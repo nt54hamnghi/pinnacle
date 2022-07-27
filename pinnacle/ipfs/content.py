@@ -7,6 +7,9 @@ from attrs import define, field
 from pinnacle.aliases.field import noninit
 from pinnacle.aliases.typehint import GeneralPath
 
+IPFS_GATEWAY = "https://ipfs.io/ipfs/{cid}"
+LOCAL_GATEWAY = "http://127.0.0.1:8080/ipfs/{cid}"
+
 
 @define(eq=False, order=False)
 class Content:
@@ -49,14 +52,12 @@ class Content:
             ValueError: if content.cid is not set
             ValueError: if category is not the options
         """
-        ipfs_gw = "https://ipfs.io/ipfs/{cid}"
-        local_gw = "http://127.0.0.1:8080/ipfs/{cid}"
 
         if not self.pinned:
             raise ValueError("Content is not pinned yet!")
         if category == "local":
-            return local_gw.format(cid=self.cid)
+            return LOCAL_GATEWAY.format(cid=self.cid)
         elif category == "ipfs":
-            return ipfs_gw.format(cid=self.cid)
+            return IPFS_GATEWAY.format(cid=self.cid)
         else:
             raise ValueError("Acceptable category: 'ipfs', 'local'")
