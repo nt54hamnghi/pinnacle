@@ -1,15 +1,14 @@
 import json
+import posixpath
 from typing import Any, Optional, Union
 
 from attrs import asdict, define
 
 from pinnacle.aliases.field import noneable, string
 from pinnacle.aliases.typehint import GeneralPath, NoneableStr
-from pinnacle.ipfs.pin import pin
-from pinnacle.ipfs.pinner import AbstractPin
 
 
-@define(frozen=True, kw_only=True)
+@define(frozen=True, kw_only=True, slots=True)
 class Attribute:
     """A data class following Opensea's attribute standard
     https://docs.opensea.io/docs/metadata-standards
@@ -36,7 +35,7 @@ class Attribute:
             raise ValueError(f"Acceptable display types: {acceptables}")
 
 
-@define(frozen=True, eq=False)
+@define(frozen=True, eq=False, slots=True)
 class Metadata:
     """A data class following Opensea's metadata standard
     https://docs.opensea.io/docs/metadata-standards
@@ -52,20 +51,18 @@ class Metadata:
         """Serialize Metadata instance (ignore None)."""
         return asdict(self, filter=lambda _, v: v is not None)
 
-    def save(
-        self,
-        filename: GeneralPath,
-        pinner: Optional[AbstractPin] = None,
-    ) -> NoneableStr:
-        """Save and pin metadata
+    def _save(self, filename: GeneralPath):
+        with open(filename, "w") as file:
+            json.dump(self.asdict(), file, indent=2)
 
-        Note: Only pin if pinner is not None
+    def save(self, filename: GeneralPath, overwrite: bool = False) -> None:
+        """Save metadata
+
+        To overwrite, set overwrite to True, default is False
         """
-
-        if not filename.exists():
-            with open(filename, "w") as file:
-                json.dump(self.asdict(), file, indent=2)
-
-        if pinner:
-            token_uri = pin(filename, pinner).gateway()
-            return token_uri
+        if overwrite:
+            self._save(filename)
+        if not posixpath.exists(filename):
+            self._save(filename)
+        else:
+            raise FileExistsError
