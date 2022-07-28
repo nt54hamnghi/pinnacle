@@ -6,7 +6,7 @@ from pinnacle.ipfs.content import IPFS_GATEWAY, LOCAL_GATEWAY, Content
 
 @pytest.fixture
 def path():
-    filename = "shiba-inu.png"
+    filename = "han.png"
     return IMG_DIR / filename, filename
 
 
@@ -30,10 +30,12 @@ def test_noninit_field(path):
 
 def test_get_gateway(path):
     path, _ = path
-    cid = "QmYx6GsYAKnNzZ9A6NvEKV9nf1VaDzJrqDR23Y8YSkebLU"
+    cid = "QmRWKJ42WTLe4ovwwpX9gMepbaRcpjsNNLsMcqs6Cqa27X"
+
     content = Content(path)
     content.pinned = True
     content.cid = cid
+
     assert content.gateway() == IPFS_GATEWAY.format(cid=cid)
     assert content.gateway("local") == LOCAL_GATEWAY.format(cid=cid)
 
