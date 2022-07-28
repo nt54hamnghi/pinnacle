@@ -45,4 +45,4 @@ def pin(
     content = Content(path, mimetype)
     config = Configuration.from_pin(pinner).update(meta)
 
-    return _pin(content, pinner, config, client, meta)
+    return _pin(content, pinner, config, client)

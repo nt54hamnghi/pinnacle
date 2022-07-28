@@ -19,9 +19,8 @@ from pinnacle.ipfs.pinner import (
 
 @pytest.fixture
 def filename():
-    breed = "SHIBA_INU"
-    path = IMG_DIR / (breed.lower().replace("_", "-") + ".png")
-    cid = "QmYx6GsYAKnNzZ9A6NvEKV9nf1VaDzJrqDR23Y8YSkebLU"
+    cid = "QmRWKJ42WTLe4ovwwpX9gMepbaRcpjsNNLsMcqs6Cqa27X"
+    path = IMG_DIR / "han.png"
     return path, cid
 
 
@@ -33,9 +32,8 @@ def check_content(content: Content, cid):
 
 
 def test_get_filename(filename) -> str:
-    path: pathlib.Path = filename[0]
-    root = "/windows10/Users/hamng/Desktop/web3/nfts/freecodecamp/v2/img"
-    assert path.as_posix() == root + "/shiba-inu.png"
+    root = "/windows10/Users/hamng/Desktop/projects/pinnacle/img"
+    assert filename[0].as_posix() == root + "/han.png"
 
 
 def test_pinata_authenticate():
@@ -63,7 +61,7 @@ def test_dynamic_upload(filename):
     path, cid = filename
     url = "http://127.0.0.1:5001/api/v0/add"
     pinner = Pin(url, callback=lambda r: r.json()["Hash"])
-    content = Pinata(path, pinner)
+    content = pin(path, pinner)
     check_content(content, cid)
 
 
@@ -74,7 +72,7 @@ def test_pinning_wiht_meta(filename):
 
     assert (
         content.cid
-        == "bafkreibfkec3ybuwxirrym2pkmn3nlrq6ng4a7zbyiegs26pw2pkl3ehxy"
+        == "bafkreid7r3lreokkhdszdgfcylu73sbquq72jqbtwqwcey7fecxru4w2ie"
     )
 
 
@@ -86,16 +84,15 @@ def test_pinata_upload(filename):
 
 def test_nft_storage(filename):
     path, _ = filename
-    # cid = "bafkreibfkec3ybuwxirrym2pkmn3nlrq6ng4a7zbyiegs26pw2pkl3ehxy"
     content = pin(path, NFTStorage())
-    assert content.pinned
-
     print(content.cid)
+
+    assert content.pinned
 
 
 def test_web3_storage(filename):
     path, _ = filename
-    cid = "bafkreibfkec3ybuwxirrym2pkmn3nlrq6ng4a7zbyiegs26pw2pkl3ehxy"
+    cid = "bafkreid7r3lreokkhdszdgfcylu73sbquq72jqbtwqwcey7fecxru4w2ie"
     content = pin(path, Web3Storage())
 
     assert content.pinned
