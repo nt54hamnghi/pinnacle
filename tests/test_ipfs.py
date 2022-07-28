@@ -1,5 +1,3 @@
-import pathlib
-
 import httpx
 import pytest
 
@@ -76,7 +74,7 @@ def test_pinning_wiht_meta(filename):
     )
 
 
-def test_pinata_upload(filename):
+def test_pinata(filename):
     path, cid = filename
     content = pin(path, Pinata())
     check_content(content, cid)

@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional, TypeVar, Union
 
-
 RealNumber = Union[int, float]
 
 NoneableStr = Optional[str]  # optional string
