@@ -22,13 +22,16 @@ def auth():
 
 
 def test_load_environment_config(token, auth):
-    assert token[1] == auth[0]
+    loaeded_var = token[1]
+    expected_var = auth[0]
+
+    assert loaeded_var == expected_var
 
 
 def test_fail_load_environment_config(token):
     # cannot load from system environment
     with pytest.raises(EnvironmentVariableNotFound):
-        load_environment_config("TEST_TOKEN", "environment")
+        load_environment_config("RANDOM", "environment")
 
     # incorrect source
     with pytest.raises(ValueError):
@@ -36,7 +39,7 @@ def test_fail_load_environment_config(token):
 
     # invalid keyname
     with pytest.raises(EnvironmentVariableNotFound):
-        load_environment_config(token[1])
+        load_environment_config("INVALID")
 
 
 def test_init_Authentication(token, auth):
@@ -50,8 +53,9 @@ def test_from_env_Authentication(token, auth):
 
 
 def test_fail_from_env_Authentication():
+    # invalid keyname
     with pytest.raises(AuthenticationKeyNotFound):
-        Authentication.from_env("TEST")
+        Authentication.from_env("INVALID")
 
 
 def test_init_Configuration_no_auth():
@@ -74,7 +78,7 @@ def test_init_Configuration_with_keyname(token, auth):
     assert cfg.auth.body == auth[1]
 
 
-def test_Configuration_params(token):
+def test_Configuration_meta(token):
     url = "http://127.0.0.1:5001/api/v0/add"
     cfg = Configuration(
         url, keyname=token[0], meta=dict(params={"only-hash": 1})
