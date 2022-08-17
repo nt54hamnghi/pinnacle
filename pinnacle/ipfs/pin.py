@@ -37,8 +37,10 @@ def pin(
     pinner: AbstractPin,
     client: Optional[httpx.Client] = None,
     mimetype: NoneableStr = None,
-    meta: dict = dict(),
+    meta: Optional[dict] = None,
 ) -> Content:
+    if meta is None:
+        meta = dict()
     if mimetype is None:
         mimetype = pinner.content_type
 

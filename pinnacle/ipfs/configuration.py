@@ -2,7 +2,7 @@ import os
 from typing import Any, Generator, Optional
 
 import httpx
-from attrs import define
+from attrs import define, field
 from dotenv import dotenv_values
 from httpx import Request, Response
 
@@ -57,7 +57,7 @@ class Configuration:
     url: str = string()
     token: NoneableStr = noneable(validator=not_empty)
     keyname: NoneableStr = noneable(validator=not_empty)
-    meta: dict = dict()
+    meta: dict = field(factory=dict)
     auth: Optional[Authentication] = noneable(init=False)
 
     def __attrs_post_init__(self):
@@ -81,7 +81,7 @@ class Configuration:
 
     def setup(self) -> dict[str, Any]:
         """Setup a parameter dict ready for httpx operation"""
-        params = {**dict(url=self.url), **self.meta}
+        params = dict(url=self.url, **self.meta)
         if not self.no_auth:
             params["auth"] = self.auth
         return params
