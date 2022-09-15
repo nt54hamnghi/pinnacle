@@ -13,12 +13,11 @@ logging.basicConfig(level=logging.INFO)
 
 def _pin(
     content: Content,
-    pinner: Pin,
     config: Config,
     client: Optional[httpx.Client] = None,
 ) -> Content:
 
-    pinner.validate()
+    config.pin.validate()
 
     request = config.setup()
     request["files"] = content.format()
@@ -27,7 +26,7 @@ def _pin(
     response.raise_for_status()
 
     content.pinned = True
-    content.cid = pinner.get_cid(response)
+    content.cid = config.pin.get_cid(response)
 
     return content
 
@@ -48,4 +47,4 @@ def pin(
     config = Config(pinner)
     config.update_params(extra)
 
-    return _pin(content, pinner, config, client)
+    return _pin(content, config, client)

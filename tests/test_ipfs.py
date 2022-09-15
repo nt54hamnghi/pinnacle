@@ -43,7 +43,7 @@ def test_no_ipfs_daemon():
         pytest.skip()
 
     with pytest.raises(NoIPFSDaemon):
-        Config.from_pin(Local())
+        Config(Local())
 
 
 def test_local(filename):
