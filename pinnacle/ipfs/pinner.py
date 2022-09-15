@@ -1,112 +1,90 @@
-from abc import ABC, abstractmethod
-from typing import Callable
+from collections.abc import Iterable
+from typing import Callable, NoReturn
 
 import httpx
 import psutil
+from attrs import define, field
 
 from pinnacle.aliases.typehint import NoneableStr
+
+CidGetter = Callable[[httpx.Response], str]
+Validator = Callable[..., NoReturn]
+
+
+def ipfs_daemon_active() -> bool:
+    """Check if there is a running ipfs daemon"""
+    return "ipfs" in {p.name() for p in psutil.process_iter()}
 
 
 class NoIPFSDaemon(psutil.Error):
     pass
 
 
-class AbstractPin(ABC):
-    # keyname is the key name to load access token.
-    # content_type is Content_Type header.
-
+# Context
+@define(order=False, eq=False)
+class Pin:
     url: str
+    getter: CidGetter
     keyname: NoneableStr = None
     content_type: str = "application/octet-stream"
+    validators: Iterable[Validator] = field(kw_only=True, factory=list)
 
-    def validate(self, *args, **kwds):
-        """method to pre-validate before pinning"""
-        pass
-
-    @abstractmethod
-    def get_cid(self, response: httpx.Response) -> str:
-        pass
-
-
-class Pin(AbstractPin):
-    """A class for dynamically creating Pin"""
-
-    def __init__(
-        self,
-        url: str,
-        callback: Callable[[httpx.Response], str],
-        keyname: NoneableStr = None,
-        content_type: str = "application/octet-stream",
-        validator: Callable[..., None] = None,
-    ) -> None:
-        """
-        Args:
-            callback (Callable[[httpx.Response], str]):
-            a callback to handle retrieving cid from a response.
-
-            validator (Callable[..., None], optional):
-            a validator to perform any check before pinning. Defaults to None.
-        """
-        self.url = url
-        self.callback = callback
-        self.keyname = keyname
-        self.content_type = content_type
-        self.validator = validator
-
-    def validate(self, *args, **kwds):
-        if self.validator is None:
-            return
-        return self.validator(*args, **kwds)
+    def validate(self) -> NoReturn:
+        for validator in self.validators:
+            validator()
 
     def get_cid(self, response: httpx.Response) -> str:
-        return self.callback(response)
+        return self.getter(response)
 
 
-class LocalPin(AbstractPin):
+def Local() -> Pin:
     """A wrapper around Pin for Local pinning"""
 
     url = "http://127.0.0.1:5001/api/v0/add"
 
-    @staticmethod
-    def ipfs_daemon_active() -> bool:
-        """Check if there is a running ipfs daemon"""
-        return "ipfs" in {p.name() for p in psutil.process_iter()}
-
-    def validate(self):
-        if not self.ipfs_daemon_active():
-            raise NoIPFSDaemon
-
-    def get_cid(self, response: httpx.Response) -> str:
+    def _getter(response: httpx.Response) -> str:
         return response.json()["Hash"]
 
+    def _validator() -> NoReturn:
+        if not ipfs_daemon_active():
+            raise NoIPFSDaemon
 
-class Pinata(AbstractPin):
+    return Pin(url, _getter, validators=[_validator])
+
+
+def Pinata() -> Pin:
     """A wrapper around Pin for Pinanta pinning"""
 
-    url = "https://api.pinata.cloud/pinning/pinFileToIPFS"
+    url = "http://127.0.0.1:5001/api/v0/add"
     keyname = "PINATA_KEY"
 
-    def get_cid(self, response: httpx.Response) -> str:
-        return response.json()["IpfsHash"]
+    def _getter(response: httpx.Response) -> str:
+        return response.json()["Hash"]
+
+    return Pin(url, _getter, keyname=keyname)
 
 
-class NFTStorage(AbstractPin):
+def NFTStorage() -> Pin:
     """A wrapper around Pin for NFT Storage pinning"""
 
     url = "https://api.nft.storage/upload"
     keyname = "NFT_STORAGE_KEY"
     content_type = "multipart/form-data"
 
-    def get_cid(self, response: httpx.Response) -> str:
+    def _getter(response: httpx.Response) -> str:
         return response.json()["value"]["cid"]
 
+    return Pin(url, _getter, keyname, content_type)
 
-class Web3Storage(AbstractPin):
+
+def Web3Storage() -> Pin:
     """A wrapper around Pin for Web3 Storage pinning"""
 
     url = "https://api.web3.storage/upload"
     keyname = "WEB3_STORAGE_KEY"
     content_type = "multipart/form-data"
 
-    def get_cid(self, response: httpx.Response) -> str:
+    def _getter(response: httpx.Response) -> str:
         return response.json()["cid"]
+
+    return Pin(url, _getter, keyname, content_type)

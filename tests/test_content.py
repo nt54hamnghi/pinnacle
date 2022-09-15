@@ -1,6 +1,6 @@
 import pytest
 
-from pinnacle.config import IMG_DIR
+from pinnacle.configuration import IMG_DIR
 from pinnacle.ipfs.content import IPFS_GATEWAY, LOCAL_GATEWAY, Content
 
 

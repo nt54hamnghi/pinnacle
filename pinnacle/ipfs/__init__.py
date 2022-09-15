@@ -1,36 +1,32 @@
-from pinnacle.ipfs.configuration import (
+from pinnacle.ipfs.config import (
     Authentication,
-    AuthenticationKeyNotFound,
-    Configuration,
-    load_environment_config,
-    EnvironmentVariableNotFound,
+    AuthKeyNotFound,
+    Config,
+    ENVNotFound,
 )
-
 from pinnacle.ipfs.content import Content
-from pinnacle.ipfs.pin import pin, _pin
+from pinnacle.ipfs.pin import _pin, pin
 from pinnacle.ipfs.pinner import (
-    NoIPFSDaemon,
-    AbstractPin,
-    Pin,
-    LocalPin,
-    Pinata,
+    Local,
     NFTStorage,
+    NoIPFSDaemon,
+    Pin,
+    Pinata,
     Web3Storage,
 )
 
 __all__ = [
     "Authentication",
-    "AuthenticationKeyNotFound",
-    "Configuration",
-    "load_environment_config",
-    "EnvironmentVariableNotFound",
+    "AuthKeyNotFound",
+    "Config",
+    "ENVNotFound",
     "Content",
     "pin",
     "_pin",
     "NoIPFSDaemon",
     "AbstractPin",
     "Pin",
-    "LocalPin",
+    "Local",
     "Pinata",
     "NFTStorage",
     "Web3Storage",

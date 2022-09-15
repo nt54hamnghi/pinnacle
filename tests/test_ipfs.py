@@ -1,25 +1,27 @@
 import httpx
 import pytest
 
-from pinnacle.config import IMG_DIR
-from pinnacle.ipfs.configuration import Configuration
+from pinnacle.configuration import IMG_DIR
+from pinnacle.ipfs.config import Authentication, Config
 from pinnacle.ipfs.content import IPFS_GATEWAY, LOCAL_GATEWAY, Content
 from pinnacle.ipfs.pin import pin
 from pinnacle.ipfs.pinner import (
-    LocalPin,
+    Local,
     NFTStorage,
     NoIPFSDaemon,
     Pin,
     Pinata,
     Web3Storage,
+    ipfs_daemon_active,
 )
 
 
 @pytest.fixture
 def filename():
-    cid = "QmRWKJ42WTLe4ovwwpX9gMepbaRcpjsNNLsMcqs6Cqa27X"
-    path = IMG_DIR / "han.png"
-    return path, cid
+    v0 = "QmVZrwrWQo9Yk9Xx4PpMWzbXoCCeD6ArFVp6berEH5Fzmh"
+    v1 = "bafkreih4wi2g7hyznblnwzs4wggznkdn46xm6hwjfsbnim7n4kymvkfrkm"
+    path = IMG_DIR / "rin.png"
+    return path, (v0, v1)
 
 
 def check_content(content: Content, cid):
@@ -29,53 +31,46 @@ def check_content(content: Content, cid):
     assert content.gateway("local") == LOCAL_GATEWAY.format(cid=cid)
 
 
-def test_get_filename(filename) -> str:
-    root = "/windows10/Users/hamng/Desktop/projects/pinnacle/img"
-    assert filename[0].as_posix() == root + "/han.png"
-
-
 def test_pinata_authenticate():
     url = "https://api.pinata.cloud/data/testAuthentication"
-    config = Configuration(url, keyname="PINATA_KEY")
-    resp = httpx.get(**config.setup())
+    auth = Authentication.from_env("PINATA_KEY")
+    resp = httpx.get(url, headers={"Authorization": auth.body})
     assert resp.status_code == 200
 
 
 def test_no_ipfs_daemon():
-    if LocalPin.ipfs_daemon_active():
+    if ipfs_daemon_active():
         pytest.skip()
 
     with pytest.raises(NoIPFSDaemon):
-        Configuration.from_pin(LocalPin())
+        Config.from_pin(Local())
 
 
-def test_local_upload(filename):
-    path, cid = filename
-    content = pin(path, LocalPin())
+def test_local(filename):
+    path, (cid, _) = filename
+    content = pin(path, Local())
     check_content(content, cid)
 
 
-def test_dynamic_upload(filename):
-    path, cid = filename
+def test_pin_with_extra_params(filename):
+    path, (_, cid) = filename
+    extra = dict(params={"only-hash": 1, "cid-version": 1})
+    content = pin(path, Local(), extra=extra)
+
+    assert content.cid == cid
+
+
+def test_dynamic(filename):
+    path, (cid, _) = filename
     url = "http://127.0.0.1:5001/api/v0/add"
-    pinner = Pin(url, callback=lambda r: r.json()["Hash"])
+
+    pinner = Pin(url, getter=lambda r: r.json()["Hash"])
     content = pin(path, pinner)
     check_content(content, cid)
 
 
-def test_pinning_wiht_meta(filename):
-    path, _ = filename
-    meta = dict(params={"only-hash": 1, "cid-version": 1})
-    content = pin(path, LocalPin(), meta=meta)
-
-    assert (
-        content.cid
-        == "bafkreid7r3lreokkhdszdgfcylu73sbquq72jqbtwqwcey7fecxru4w2ie"
-    )
-
-
 def test_pinata(filename):
-    path, cid = filename
+    path, (cid, _) = filename
     content = pin(path, Pinata())
     check_content(content, cid)
 
@@ -83,14 +78,15 @@ def test_pinata(filename):
 def test_nft_storage(filename):
     path, _ = filename
     content = pin(path, NFTStorage())
+    raw = "bafybeid3n6a432eh6lqdl6igddmajn5qrtdaqqrbvjhuzxrlpx7syqasku"
     print(content.cid)
 
     assert content.pinned
+    assert content.cid == raw
 
 
 def test_web3_storage(filename):
-    path, _ = filename
-    cid = "bafkreid7r3lreokkhdszdgfcylu73sbquq72jqbtwqwcey7fecxru4w2ie"
+    path, (_, cid) = filename
     content = pin(path, Web3Storage())
 
     assert content.pinned

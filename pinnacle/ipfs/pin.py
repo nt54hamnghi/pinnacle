@@ -4,21 +4,21 @@ from typing import Optional
 import httpx
 
 from pinnacle.aliases.typehint import GeneralPath, NoneableStr
-from pinnacle.ipfs.configuration import Configuration
+from pinnacle.ipfs.config import Config
 from pinnacle.ipfs.content import Content
-from pinnacle.ipfs.pinner import AbstractPin
+from pinnacle.ipfs.pinner import Pin
 
 logging.basicConfig(level=logging.INFO)
 
 
 def _pin(
     content: Content,
-    pinner: AbstractPin,
-    config: Configuration,
+    pinner: Pin,
+    config: Config,
     client: Optional[httpx.Client] = None,
 ) -> Content:
 
-    pinner.validate()
+    # pinner.validate()
 
     request = config.setup()
     request["files"] = content.format()
@@ -34,17 +34,18 @@ def _pin(
 
 def pin(
     path: GeneralPath,
-    pinner: AbstractPin,
+    pinner: Pin,
     client: Optional[httpx.Client] = None,
     mimetype: NoneableStr = None,
-    meta: Optional[dict] = None,
+    extra: Optional[dict] = None,
 ) -> Content:
-    if meta is None:
-        meta = dict()
+    if extra is None:
+        extra = dict()
     if mimetype is None:
         mimetype = pinner.content_type
 
     content = Content(path, mimetype)
-    config = Configuration.from_pin(pinner).update(meta)
+    config = Config(pinner)
+    config.update_params(extra)
 
     return _pin(content, pinner, config, client)
