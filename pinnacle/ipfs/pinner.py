@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Callable, NoReturn
+from typing import Callable, NoReturn, Optional
 
 import httpx
 import psutil
@@ -8,7 +8,7 @@ from attrs import define, field
 from pinnacle.aliases.typehint import NoneableStr
 
 CidGetter = Callable[[httpx.Response], str]
-Validator = Callable[..., NoReturn]
+Validator = Callable[..., Optional[NoReturn]]
 
 
 def ipfs_daemon_active() -> bool:
@@ -29,7 +29,7 @@ class Pin:
     content_type: str = "application/octet-stream"
     validators: Iterable[Validator] = field(kw_only=True, factory=list)
 
-    def validate(self) -> NoReturn:
+    def validate(self) -> Optional[NoReturn]:
         for validator in self.validators:
             validator()
 
@@ -45,7 +45,7 @@ def Local() -> Pin:
     def _getter(response: httpx.Response) -> str:
         return response.json()["Hash"]
 
-    def _validator() -> NoReturn:
+    def _validator() -> Optional[NoReturn]:
         if not ipfs_daemon_active():
             raise NoIPFSDaemon
 

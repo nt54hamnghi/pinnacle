@@ -18,7 +18,7 @@ def _pin(
     client: Optional[httpx.Client] = None,
 ) -> Content:
 
-    # pinner.validate()
+    pinner.validate()
 
     request = config.setup()
     request["files"] = content.format()
