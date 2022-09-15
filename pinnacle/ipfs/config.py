@@ -5,8 +5,8 @@ import httpx
 from attrs import define, field
 from dotenv import dotenv_values
 from httpx import Request, Response
-from pinnacle.aliases.typehint import NoneableStr
 
+from pinnacle.aliases.typehint import NoneableStr
 from pinnacle.ipfs.pinner import Pin
 
 
