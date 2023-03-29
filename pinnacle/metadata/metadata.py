@@ -1,68 +1,74 @@
-import json
+import datetime
 import posixpath
-from typing import Any, Optional, Union
+from enum import StrEnum, auto
+from typing import Literal
 
-from attrs import asdict, define
+import pydantic
+from pinnacle.aliases.typehint import PathType
+from pydantic import BaseModel, Field, HttpUrl, parse_obj_as
 
-from pinnacle.aliases.field import noneable, string
-from pinnacle.aliases.typehint import GeneralPath, NoneableStr
+
+class Trail(BaseModel):
+    trail_type: str
+    value: int | float | str
 
 
-@define(frozen=True, kw_only=True, slots=True)
-class Attribute:
-    """A data class following Opensea's attribute standard
+class DisplayType(StrEnum):
+    number = auto()
+    boost_percentage = auto()
+    boost_number = auto()
+
+
+class NumberTrail(Trail):
+    display_type: DisplayType
+    max_value: float | int
+
+    @pydantic.root_validator()
+    @classmethod
+    def is_value_less_than_max(cls, values):
+        value, max_value = values["value"], values["max_value"]
+        if value > max_value:
+            raise ValueError(
+                f"Invalid value of. Cannot be larger than max_value {max_value}"
+            )
+        return values
+
+
+class DateTrail(Trail):
+    display_type: Literal["date"] = Field(default="date", const=True)
+
+    @pydantic.validator("value")
+    @classmethod
+    def is_value_datetime(cls, value):
+        result = parse_obj_as(datetime.datetime, value).replace(microsecond=0)
+        return int(result.timestamp())
+
+
+class Metadata(BaseModel):
+    """A model following Opensea's attribute standard
     https://docs.opensea.io/docs/metadata-standards
     """
 
-    trait: str = string()
-    value: Union[int, float, str]
-    display_type: NoneableStr = noneable()
+    image: HttpUrl
+    name: str
+    description: str
+    external_url: HttpUrl
+    attribute: list[Trail]
 
-    @display_type.validator
-    def _check_display_type(self, attr, val):
-        """Validate display type.
-
-        if value is string, display type must be None
-        if value is int or float, display type can be:
-            "boost_percentage", "boost_number", "number", None
-        """
-        acceptables = ["boost_percentage", "boost_number", "number", None]
-
-        if isinstance(self.value, str) and val is not None:
-            raise TypeError("display type must be None, if value is string")
-
-        if isinstance(self.value, (int, float)) and val not in acceptables:
-            raise ValueError(f"Acceptable display types: {acceptables}")
-
-
-@define(frozen=True, eq=False, slots=True)
-class Metadata:
-    """A data class following Opensea's metadata standard
-    https://docs.opensea.io/docs/metadata-standards
-    """
-
-    name: str = string()
-    description: str = string()
-    image: str = string()
-    external_url: NoneableStr = noneable(kw_only=True)
-    attributes: Optional[list[Attribute]] = noneable(kw_only=True)
-
-    def asdict(self) -> dict[str, Any]:
+    def asdict(self):
         """Serialize Metadata instance (ignore None)."""
-        return asdict(self, filter=lambda _, v: v is not None)
+        return self.dict(exclude=None)
 
-    def _save(self, filename: GeneralPath):
-        with open(filename, "w") as file:
-            json.dump(self.asdict(), file, indent=2)
+    def dump(self, filename: PathType):
+        with open(filename, "w") as f:
+            f.write(self.json(exclude_none=True))
 
-    def save(self, filename: GeneralPath, overwrite: bool = False) -> None:
-        """Save metadata
+    def save(self, filename: PathType, overwrite: bool = False) -> None:
+        """Save metadata"""
 
-        To overwrite, set overwrite to True, default is False
-        """
         if overwrite:
-            self._save(filename)
-        if not posixpath.exists(filename):
-            self._save(filename)
+            self.dump(filename)
         else:
-            raise FileExistsError
+            if posixpath.exists(filename):
+                raise FileExistsError
+            self.dump(filename)
