@@ -1,3 +1,3 @@
-from pinnacle.metadata.metadata import Attribute, Metadata
+from .metadata import DateTrail, DisplayType, Metadata, NumberTrail, Trail
 
-__all__ = ["Metadata", "Attribute"]
+__all__ = ("DateTrail", "DisplayType", "Metadata", "NumberTrail", "Trail")

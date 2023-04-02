@@ -1,10 +1,10 @@
 import datetime
-import posixpath
 from enum import StrEnum, auto
+from posixpath import isfile, exists
 from typing import Literal
 
 import pydantic
-from pinnacle.aliases.typehint import PathType
+from pinnacle.type_aliases import PathType
 from pydantic import BaseModel, Field, HttpUrl, parse_obj_as
 
 
@@ -26,10 +26,10 @@ class NumberTrail(Trail):
     @pydantic.root_validator()
     @classmethod
     def is_value_less_than_max(cls, values):
-        value, max_value = values["value"], values["max_value"]
-        if value > max_value:
+        value, max = values["value"], values["max_value"]
+        if value > max:
             raise ValueError(
-                f"Invalid value of. Cannot be larger than max_value {max_value}"
+                f"Invalid value of. Cannot be larger than max_value {max}"
             )
         return values
 
@@ -69,6 +69,6 @@ class Metadata(BaseModel):
         if overwrite:
             self.dump(filename)
         else:
-            if posixpath.exists(filename):
+            if exists(filename) and isfile(filename):
                 raise FileExistsError
             self.dump(filename)
