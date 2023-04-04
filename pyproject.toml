@@ -25,6 +25,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 python_version = "3.11"
+plugins = "pydantic.mypy"
 # output
 pretty = true
 # include
