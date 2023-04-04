@@ -1,35 +1,38 @@
 from collections.abc import Iterable
-from typing import Callable, NoReturn, Optional
+from dataclasses import dataclass, field
+from typing import Callable
 
 import httpx
 import psutil
-from attrs import define, field
-
-from pinnacle.aliases.typehint import NoneableStr
 
 CidGetter = Callable[[httpx.Response], str]
-Validator = Callable[..., Optional[NoReturn]]
+Validator = Callable[..., None]
 
 
 def ipfs_daemon_active() -> bool:
-    """Check if there is a running ipfs daemon"""
-    return "ipfs" in {p.name() for p in psutil.process_iter()}
+    """Check if ipfs daemon is running"""
+    return "ipfs daemon" in {p.name() for p in psutil.process_iter()}
 
 
 class NoIPFSDaemon(psutil.Error):
     pass
 
 
-# Context
-@define(order=False, eq=False)
+class CidNotFound(KeyError):
+    pass
+
+
+@dataclass
 class Pin:
     url: str
     getter: CidGetter
-    keyname: NoneableStr = None
+    keyname: str | None = None
     content_type: str = "application/octet-stream"
-    validators: Iterable[Validator] = field(kw_only=True, factory=list)
+    validators: Iterable[Validator] = field(
+        kw_only=True, default_factory=tuple
+    )
 
-    def validate(self) -> Optional[NoReturn]:
+    def validate(self):
         for validator in self.validators:
             validator()
 
@@ -43,9 +46,12 @@ def Local() -> Pin:
     url = "http://127.0.0.1:5001/api/v0/add"
 
     def _getter(response: httpx.Response) -> str:
-        return response.json()["Hash"]
+        cid = response.json()["Hash"]
+        if cid is None:
+            raise CidNotFound
+        return cid
 
-    def _validator() -> Optional[NoReturn]:
+    def _validator():
         if not ipfs_daemon_active():
             raise NoIPFSDaemon
 

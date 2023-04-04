@@ -1,11 +1,12 @@
 import datetime
 from enum import StrEnum, auto
-from posixpath import isfile, exists
+from posixpath import exists, isfile
 from typing import Literal
 
 import pydantic
-from pinnacle.type_aliases import PathType
 from pydantic import BaseModel, Field, HttpUrl, parse_obj_as
+
+from pinnacle.type_aliases import PathType
 
 
 class Trail(BaseModel):

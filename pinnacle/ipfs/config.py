@@ -1,13 +1,12 @@
 import os
-from typing import Any, Generator, Optional
+from typing import Any, Generator, Optional, Self
 
 import httpx
 from attrs import define, field
 from dotenv import dotenv_values
 from httpx import Request, Response
 
-from pinnacle.aliases.typehint import NoneableStr
-from pinnacle.ipfs.pinner import Pin
+from pinnacle.ipfs.api.pinner import Pin
 
 
 class ENVNotFound(KeyError):
@@ -24,7 +23,7 @@ def _from_os_env(keyname: str) -> str:
     return env_var
 
 
-def _from_dot_env(keyname: str) -> str:
+def _from_dot_env(keyname: str):
     try:
         return dotenv_values(".env")[keyname]
     except KeyError:
@@ -32,16 +31,16 @@ def _from_dot_env(keyname: str) -> str:
 
 
 class Authentication(httpx.Auth):
-    def __init__(self, token: NoneableStr = None):
+    def __init__(self, token: str | None = None):
         self.token = token
 
     @property
-    def body(self) -> Optional[dict]:
+    def body(self) -> str | None:
         """Authentication property. Formated to be ready for request"""
         return f"Bearer {self.token}" if self.token else None
 
     @classmethod
-    def from_env(cls, keyname: str):
+    def from_env(cls, keyname: str) -> Self:
         """Alternative constructor to load from environment variable"""
         try:
             return cls(_from_dot_env(keyname))
@@ -54,13 +53,13 @@ class Authentication(httpx.Auth):
     def auth_flow(
         self, request: Request
     ) -> Generator[Request, Response, None]:
-        request.headers["Authorization"] = self.body
+        if self.body:
+            request.headers["Authorization"] = self.body
         yield request
 
 
 @define(eq=False, order=False)
 class Config:
-
     # the extra_params attribute includes optional arguments of httpx methods.
     # A complete list: https://www.python-httpx.org/api/#helper-functions
 

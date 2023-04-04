@@ -5,8 +5,8 @@ from pinnacle.ipfs.config import (
     ENVNotFound,
 )
 from pinnacle.ipfs.content import Content
-from pinnacle.ipfs.pin import _pin, pin
-from pinnacle.ipfs.pinner import (
+from pinnacle.ipfs.api.pin import _pin, pin
+from pinnacle.ipfs.api.pinner import (
     Local,
     NFTStorage,
     NoIPFSDaemon,

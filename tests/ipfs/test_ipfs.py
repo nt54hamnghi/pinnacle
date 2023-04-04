@@ -1,11 +1,11 @@
 import httpx
 import pytest
 
-from pinnacle.dirs import IMG_DIR
+from pinnacle.consts.dirs import IMG_DIR
 from pinnacle.ipfs.config import Authentication, Config
 from pinnacle.ipfs.content import IPFS_GATEWAY, LOCAL_GATEWAY, Content
-from pinnacle.ipfs.pin import pin
-from pinnacle.ipfs.pinner import (
+from pinnacle.ipfs.api.pin import pin
+from pinnacle.ipfs.api.pinner import (
     Local,
     NFTStorage,
     NoIPFSDaemon,

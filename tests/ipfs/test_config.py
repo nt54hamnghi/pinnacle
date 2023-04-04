@@ -8,7 +8,7 @@ from pinnacle.ipfs.config import (
     _from_dot_env,
     _from_os_env,
 )
-from pinnacle.ipfs.pinner import Local
+from pinnacle.ipfs.api.pinner import Local
 
 
 @pytest.fixture

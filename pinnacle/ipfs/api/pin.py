@@ -3,10 +3,10 @@ from typing import Optional
 
 import httpx
 
-from pinnacle.aliases.typehint import GeneralPath, NoneableStr
 from pinnacle.ipfs.config import Config
 from pinnacle.ipfs.content import Content
-from pinnacle.ipfs.pinner import Pin
+from pinnacle.ipfs.api.pinner import Pin
+from pinnacle.type_aliases import PathType
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,7 +16,6 @@ def _pin(
     config: Config,
     client: Optional[httpx.Client] = None,
 ) -> Content:
-
     config.pin.validate()
 
     request = config.setup()
@@ -32,10 +31,10 @@ def _pin(
 
 
 def pin(
-    path: GeneralPath,
+    path: PathType,
     pinner: Pin,
     client: Optional[httpx.Client] = None,
-    mimetype: NoneableStr = None,
+    mimetype: str | None = None,
     extra: Optional[dict] = None,
 ) -> Content:
     if extra is None:
