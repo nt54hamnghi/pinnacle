@@ -1,12 +1,11 @@
 import os
-from typing import Any, Generator, Optional, Self
+from typing import Any, Generator, Self
 
 import httpx
-from attrs import define, field
 from dotenv import dotenv_values
 from httpx import Request, Response
 
-from pinnacle.ipfs.api.pinner import Pin
+from pinnacle.consts.pin_service import LOCAL_SERVICE
 
 
 class ENVNotFound(KeyError):
@@ -30,14 +29,21 @@ def _from_dot_env(keyname: str):
         raise ENVNotFound(keyname)
 
 
-class Authentication(httpx.Auth):
+class BearerAuth(httpx.Auth):
     def __init__(self, token: str | None = None):
         self.token = token
 
     @property
-    def body(self) -> str | None:
+    def bearer_token(self) -> str | None:
         """Authentication property. Formated to be ready for request"""
         return f"Bearer {self.token}" if self.token else None
+
+    def auth_flow(
+        self, request: Request
+    ) -> Generator[Request, Response, None]:
+        if self.bearer_token:
+            request.headers["Authorization"] = self.bearer_token
+        yield request
 
     @classmethod
     def from_env(cls, keyname: str) -> Self:
@@ -50,43 +56,34 @@ class Authentication(httpx.Auth):
             except ENVNotFound:
                 raise AuthKeyNotFound
 
-    def auth_flow(
-        self, request: Request
-    ) -> Generator[Request, Response, None]:
-        if self.body:
-            request.headers["Authorization"] = self.body
-        yield request
 
-
-@define(eq=False, order=False)
 class Config:
-    # the extra_params attribute includes optional arguments of httpx methods.
-    # A complete list: https://www.python-httpx.org/api/#helper-functions
-
-    pin: Pin
-    auth: Optional[Authentication] = None
-    extra_params: dict = field(factory=dict)
-
-    def __attrs_post_init__(self):
-        _keyname = self.pin.keyname
-        if self.auth is None and _keyname is not None:
-            self.auth = Authentication.from_env(_keyname)
+    def __init__(
+        self,
+        url: str = LOCAL_SERVICE,
+        auth: httpx.Auth | None = None,
+        extra_params: dict[str, Any] | None = None,
+    ) -> None:
+        self.url = url
+        self.auth = auth
+        # extra_params is optional arguments of httpx methods.
+        # https://www.python-httpx.org/api/#helper-functions
+        self.extra_params = {} if extra_params is None else extra_params
 
     @property
     def no_auth(self) -> bool:
         return self.auth is None
-
-    def load_auth(self, keyname: str) -> None:
-        self.auth = Authentication.from_env(keyname)
 
     def update_params(self, params: dict[str, Any]) -> None:
         self.extra_params.update(params)
 
     def setup(self) -> dict[str, Any]:
         """Setup a parameter dict ready for httpx operation"""
-
-        self.update_params({"url": self.pin.url})
-
-        if not self.no_auth:
+        self.update_params({"url": self.url})
+        if self.auth:
             self.update_params({"auth": self.auth})
+
         return self.extra_params
+
+    # def init_auth(self, keyname: str) -> None:
+    #     self.auth = httpx.Auth.from_env(keyname)

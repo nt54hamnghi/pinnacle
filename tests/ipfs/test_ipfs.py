@@ -2,14 +2,14 @@ import httpx
 import pytest
 
 from pinnacle.consts.dirs import IMG_DIR
-from pinnacle.ipfs.config import Authentication, Config
+from pinnacle.ipfs.config import BearerAuth, Config
 from pinnacle.ipfs.content import IPFS_GATEWAY, LOCAL_GATEWAY, Content
 from pinnacle.ipfs.api.pin import pin
-from pinnacle.ipfs.api.pinner import (
+from pinnacle.ipfs.api.pin_client import (
     Local,
     NFTStorage,
     NoIPFSDaemon,
-    Pin,
+    PinClient,
     Pinata,
     Web3Storage,
     ipfs_daemon_active,
@@ -33,8 +33,8 @@ def check_content(content: Content, cid):
 
 def test_pinata_authenticate():
     url = "https://api.pinata.cloud/data/testAuthentication"
-    auth = Authentication.from_env("PINATA_KEY")
-    resp = httpx.get(url, headers={"Authorization": auth.body})
+    auth = BearerAuth.from_env("PINATA_KEY")
+    resp = httpx.get(url, headers={"Authorization": auth.bearer_token})
     assert resp.status_code == 200
 
 
@@ -64,7 +64,7 @@ def test_dynamic(filename):
     path, (cid, _) = filename
     url = "http://127.0.0.1:5001/api/v0/add"
 
-    pinner = Pin(url, getter=lambda r: r.json()["Hash"])
+    pinner = PinClient(url, getter=lambda r: r.json()["Hash"])
     content = pin(path, pinner)
     check_content(content, cid)
 

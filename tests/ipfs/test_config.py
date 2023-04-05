@@ -1,14 +1,14 @@
 import pytest
 
 from pinnacle.ipfs.config import (
-    Authentication,
+    BearerAuth,
     AuthKeyNotFound,
     Config,
     ENVNotFound,
     _from_dot_env,
     _from_os_env,
 )
-from pinnacle.ipfs.api.pinner import Local
+from pinnacle.ipfs.api.pin_client import Local
 
 
 @pytest.fixture
@@ -41,20 +41,20 @@ def test_from_dot_env(auth):
 
 def test_init_Authentication(auth):
     _, token, bearer = auth
-    authen = Authentication(token)
-    assert authen.body == bearer
+    authen = BearerAuth(token)
+    assert authen.bearer_token == bearer
 
 
 def test_from_env_Authentication(auth):
     keyname, _, bearer = auth
-    authen = Authentication.from_env(keyname)
-    assert authen.body == bearer
+    authen = BearerAuth.from_env(keyname)
+    assert authen.bearer_token == bearer
 
 
 def test_fail_from_env_Authentication():
     # invalid keyname
     with pytest.raises(AuthKeyNotFound):
-        Authentication.from_env("INVALID")
+        BearerAuth.from_env("INVALID")
 
 
 def test_no_auth_Configuration():
@@ -65,6 +65,6 @@ def test_no_auth_Configuration():
 
 def test_pass_auth_Configuration(auth):
     keyname, *_ = auth
-    auth = Authentication.from_env(keyname)
+    auth = BearerAuth.from_env(keyname)
     cfg = Config(Local(), auth)
     assert not cfg.no_auth
