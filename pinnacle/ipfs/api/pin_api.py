@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Callable, Literal, TypeAlias
+from typing import Callable, ClassVar, Literal, TypeAlias
 
 import httpx
 from pydantic import BaseModel, Field
@@ -10,15 +10,42 @@ from pinnacle.ipfs.content.content import Content
 from ..config import BearerAuth, Config
 from ..model.model import Pin, PinResults, Status, TextMatchingStrategy
 
-APIClient: TypeAlias = httpx.Client
+
+class APIClient:
+    def __init__(self, client: httpx.Client) -> None:
+        self._client = client
+
+    @staticmethod
+    def _prepare(endpoint: str, config: Config, **kwargs):
+        request_params = config.setup()
+        url = {"url": f"{config.url}/{endpoint}"}
+
+        return url | request_params | kwargs
+
+    def get(self, endpoint: str, config: Config, **kwargs):
+        params = self._prepare(endpoint, config, **kwargs)
+
+        return self._client.get(**params)
+
+    def post(self, endpoint: str, config: Config, **kwargs):
+        params = self._prepare(endpoint, config, **kwargs)
+
+        return self._client.post(**params)
+
+    def delete(self, endpoint: str, config: Config, **kwargs):
+        params = self._prepare(endpoint, config, **kwargs)
+
+        return self._client.delete(**params)
 
 
 class PinAPI(ABC):
+    global_config: ClassVar[Config]
+
     def __init__(
-        self, api_client: APIClient, config: Config | None = None
+        self, client: httpx.Client, config: Config | None = None
     ) -> None:
-        self.api_client = api_client
-        self.config = Config() if config is None else config
+        self.api_client = APIClient(client)
+        self.config = self.global_config if config is None else config
 
     @abstractmethod
     def add(self, content: Content, cid_version: int = 1):
@@ -51,25 +78,6 @@ class PinAPI(ABC):
     def authenticate_with_env(self, env_name: str):
         auth = BearerAuth.from_env(env_name)
         self.config.update_authentication(auth)
-
-    def _call_api(
-        self,
-        method: Literal["GET", "POST", "DELETE"],
-        endpoint: str,
-        **kwargs,
-    ):
-        request_params = self.config.setup() | kwargs
-        url = f"{self.config.url}/{endpoint}"
-
-        match method:
-            case "GET":
-                return self.api_client.get(url=url, **request_params)
-            case "POST":
-                return self.api_client.post(url=url, **request_params)
-            case "DELETE":
-                return self.api_client.delete(url=url, **request_params)
-            case _:
-                raise ValueError("Unsupported HTTP Method")
 
 
 # cid: list[str] | None = None,

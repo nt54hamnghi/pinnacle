@@ -1,6 +1,6 @@
-from email import header
 import httpx
 from pydantic import BaseModel, Field
+from pinnacle.ipfs.config import Config
 
 from pinnacle.ipfs.content.content import Content
 
@@ -18,12 +18,16 @@ class LocalPinAddResponse(BaseModel):
     Bytes: int | None = None
 
 
-class LocalPinAPI(PinAPI):
+class LocalPin(PinAPI):
+    global_config = Config()
+
     def add(self, content: Content, cid_version: int = 1):
+        config = self.config
+
         try:
-            raw = self._call_api(
-                "POST",
-                "add",
+            raw = self.api_client.post(
+                endpoint="add",
+                config=self.config,
                 files=content.prepare(),
                 params={"cid-version": cid_version},
             )
@@ -31,7 +35,6 @@ class LocalPinAPI(PinAPI):
         except httpx.ConnectError:
             raise NoIPFSDaemonError("IPFS daemon is not running")
         else:
-            print(raw.request.headers)
             response = LocalPinAddResponse(**raw.json())
             pinned_cid = response.Hash
             content.pinned(pinned_cid)
