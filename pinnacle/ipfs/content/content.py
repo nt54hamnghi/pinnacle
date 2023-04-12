@@ -12,10 +12,10 @@ class Gateway:
         self.gatewayURL = gatewayURL
 
     def path_gateway(self, cid: str):
-        return f"https://{self.gatewayURL}/ipfs/{cid}/"
+        return f"http://{self.gatewayURL}/ipfs/{cid}/"
 
     def subdomain_gateway(self, cid: str):
-        return f"https://{cid}.ipfs.{self.gatewayURL}/"
+        return f"http://{cid}.ipfs.{self.gatewayURL}/"
 
     def gateway(
         self,
@@ -33,10 +33,13 @@ class Gateway:
 
 
 GATEWAYS = {
-    "local": Gateway("127.0.0.1:8080"),
+    "local": Gateway("localhost:8080"),
+    "local_ip": Gateway("127.0.0.1:8080"),
     "ipfs": Gateway("ipfs.io"),
     "nft_storage": Gateway("nftstorage.link"),
 }
+
+GatewayName = Literal["local", "local_ip", "ipfs", "nft_storage"]
 
 
 class BaseContent:
@@ -60,8 +63,21 @@ class BaseContent:
         """Gateway-agnostic URI"""
         return f"ipfs://{self.cid}"
 
+    def pinned(self, cid: str):
+        self.is_pinned = True
+        self.cid = cid
+
+    def prepare(self) -> dict[str, tuple[str, bytes]]:
+        """Prepare a dict containing fields ready for pinning"""
+        if self._bytes is None:
+            raise ValueError("Content's bytes has not been read")
+
+        return dict(file=(self.basename, self._bytes))
+
     def gateway(
-        self, gateway_name: Literal["local", "ipfs", "nft_storage"] = "ipfs"
+        self,
+        gateway_name: GatewayName = "ipfs",
+        gateway_type: Literal["path", "subdomain"] = "path",
     ):
         """Generate an IPFS-compatible url to view content"""
         if not self.is_pinned:
@@ -73,20 +89,7 @@ class BaseContent:
         except KeyError:
             raise ValueError(f"Invalid gateway. Available: {GATEWAYS.keys}")
         else:
-            return gateway.gateway(self.cid)
-
-    def prepare(self) -> dict[str, tuple[str, bytes, str]]:
-        """Prepare a dict containing fields ready for pinning"""
-        if self._bytes is None:
-            raise ValueError("Content's bytes has not been read")
-
-        return dict(
-            file=(
-                self.basename,
-                self._bytes,
-                self.mimetype,
-            )
-        )
+            return gateway.gateway(self.cid, gateway_type)
 
 
 class Content(BaseContent):

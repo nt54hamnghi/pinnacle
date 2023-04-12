@@ -15,7 +15,7 @@ from pinnacle.ipfs.config import (
     Config,
     ENVNotFound,
 )
-from pinnacle.ipfs.content import Content
+from pinnacle.ipfs.content.content import Content
 
 __all__ = [
     "BearerAuth",
