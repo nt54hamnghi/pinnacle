@@ -1,7 +1,7 @@
 import pytest
 
 from pinnacle.consts.dirs import IMG_DIR
-from pinnacle.ipfs.content import IPFS_GATEWAY, LOCAL_GATEWAY, Content
+from pinnacle.ipfs.content.content import IPFS_GATEWAY, LOCAL_GATEWAY, Content
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def test_get_gateway(path):
     cid = "QmRWKJ42WTLe4ovwwpX9gMepbaRcpjsNNLsMcqs6Cqa27X"
 
     content = Content(path)
-    content.pinned = True
+    content.is_pinned = True
     content.cid = cid
 
     assert content.gateway() == IPFS_GATEWAY.format(cid=cid)
@@ -57,4 +57,4 @@ def test_fail_get_gateway(path):
 def test_prepare(path):
     content = Content(path[0], "application/json")
     expected = dict(file=(path[1], content.read(), "application/json"))
-    assert content.format() == expected
+    assert content.prepare() == expected

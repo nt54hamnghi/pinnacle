@@ -8,7 +8,7 @@ from pinnacle.ipfs.config import (
     _from_dot_env,
     _from_os_env,
 )
-from pinnacle.ipfs.api.pin_client import Local
+from pinnacle.ipfs.api.pin_api import Local
 
 
 @pytest.fixture
@@ -60,11 +60,11 @@ def test_fail_from_env_Authentication():
 def test_no_auth_Configuration():
     local = Local()
     cfg = Config(local)
-    assert cfg.no_auth
+    assert cfg.no_authentication
 
 
 def test_pass_auth_Configuration(auth):
     keyname, *_ = auth
     auth = BearerAuth.from_env(keyname)
     cfg = Config(Local(), auth)
-    assert not cfg.no_auth
+    assert not cfg.no_authentication
