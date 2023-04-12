@@ -16,17 +16,17 @@ class AuthKeyNotFound(ENVNotFound):
     pass
 
 
-def _from_os_env(keyname: str) -> str:
-    if (env_var := os.getenv(keyname)) is None:
-        raise ENVNotFound(keyname)
+def _from_os_env(env_name: str) -> str:
+    if (env_var := os.getenv(env_name)) is None:
+        raise ENVNotFound(env_name)
     return env_var
 
 
-def _from_dot_env(keyname: str):
+def _from_dot_env(env_name: str):
     try:
-        return dotenv_values(".env")[keyname]
+        return dotenv_values(".env")[env_name]
     except KeyError:
-        raise ENVNotFound(keyname)
+        raise ENVNotFound(env_name)
 
 
 class BearerAuth(httpx.Auth):
@@ -70,8 +70,11 @@ class Config:
         # https://www.python-httpx.org/api/#helper-functions
         self.extra_params = {} if extra_params is None else extra_params
 
+    def update_authentication(self, auth: BearerAuth):
+        self.auth = auth
+
     @property
-    def no_auth(self) -> bool:
+    def no_authentication(self) -> bool:
         return self.auth is None
 
     def update_params(self, params: dict[str, Any]) -> None:
@@ -79,11 +82,7 @@ class Config:
 
     def setup(self) -> dict[str, Any]:
         """Setup a parameter dict ready for httpx operation"""
-        self.update_params({"url": self.url})
         if self.auth:
             self.update_params({"auth": self.auth})
 
         return self.extra_params
-
-    # def init_auth(self, keyname: str) -> None:
-    #     self.auth = httpx.Auth.from_env(keyname)
