@@ -1,7 +1,7 @@
 import httpx
 from pydantic import BaseModel, Field
-from pinnacle.ipfs.config import Config
 
+from pinnacle.ipfs.config import Config
 from pinnacle.ipfs.content.content import Content
 
 from .pin_api import PinAPI
@@ -21,15 +21,19 @@ class LocalPinAddResponse(BaseModel):
 class LocalPin(PinAPI):
     global_config = Config()
 
-    def add(self, content: Content, cid_version: int = 1):
-        config = self.config
-
+    def add(
+        self,
+        content: Content,
+        *,
+        cid_version: int = 1,
+        client: httpx.Client | None = None,
+    ):
         try:
-            raw = self.api_client.post(
-                endpoint="add",
-                config=self.config,
-                query_params={"cid-version": cid_version},
+            raw = self._post(
+                "add",
                 files=content.prepare(),
+                query_params={"cid-version": cid_version},
+                client=client,
             )
             raw.raise_for_status()
         except httpx.ConnectError:

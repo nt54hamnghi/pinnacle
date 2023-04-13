@@ -8,7 +8,7 @@ from pinnacle.ipfs.content.content import Content
 def main():
     with httpx.Client() as client:
         with Content(IMG_DIR / "han.png") as content:
-            LocalPin(client).add(content)
+            LocalPin().add(content, client=client)
 
             print(content.gateway("local"))
 
