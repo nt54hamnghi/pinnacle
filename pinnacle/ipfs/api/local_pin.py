@@ -26,14 +26,12 @@ class LocalPin(PinAPI):
         content: Content,
         *,
         cid_version: int = 1,
-        client: httpx.Client | None = None,
     ):
         try:
             raw = self._post(
                 "add",
                 files=content.prepare(),
                 query_params={"cid-version": cid_version},
-                client=client,
             )
             raw.raise_for_status()
         except httpx.ConnectError:

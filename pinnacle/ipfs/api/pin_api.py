@@ -13,9 +13,14 @@ from ..model.model import Pin
 class PinAPI(ABC):
     global_config: ClassVar[Config]
 
-    def __init__(self, config: Config | None = None) -> None:
+    def __init__(
+        self,
+        config: Config | None = None,
+        api_client: httpx.Client | None = None,
+        async_api_client: httpx.AsyncClient | None = None,
+    ) -> None:
         self.config = self.global_config if config is None else config
-        self.api_client: httpx.Client | None = None
+        self.api_client = api_client or httpx.Client()
 
     @abstractmethod
     def add(self, content: Content, *, cid_version: int = 1):
@@ -49,10 +54,16 @@ class PinAPI(ABC):
         auth = BearerAuth.from_env(env_name)
         self.config.update_authentication(auth)
 
-    def register_client(self, client: httpx.Client):
-        self.api_client = client
+    def __enter__(self):
+        self.api_client.__enter__()
+        return self
 
-    def _prepare(self, endpoint: str, query_params: dict | None = None):
+    def __exit__(self, exc_type, exc_instance, traceback):
+        return self.api_client.__exit__(exc_type, exc_instance, traceback)
+
+    def _build_request_params(
+        self, endpoint: str, query_params: dict | None = None
+    ):
         request_params = {
             "url": f"{self.config.url}/{endpoint}",
             "params": query_params,
@@ -66,9 +77,7 @@ class PinAPI(ABC):
         *,
         files: RequestFiles | None = None,
         query_params: dict | None = None,
-        client: httpx.Client | None = None,
     ):
-        _params = self._prepare(endpoint, query_params)
-        _client = client or self.api_client or httpx
+        _params = self._build_request_params(endpoint, query_params)
 
-        return _client.post(**_params, files=files)
+        return self.api_client.post(**_params, files=files)

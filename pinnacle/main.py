@@ -1,14 +1,12 @@
-import httpx
-
 from pinnacle.consts.dirs import IMG_DIR
 from pinnacle.ipfs.api.local_pin import LocalPin
 from pinnacle.ipfs.content.content import Content
 
 
 def main():
-    with httpx.Client() as client:
+    with LocalPin() as pin:
         with Content(IMG_DIR / "han.png") as content:
-            LocalPin().add(content, client=client)
+            pin.add(content)
 
             print(content.gateway("local"))
 
