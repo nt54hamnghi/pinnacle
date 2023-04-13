@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Callable, ClassVar, Literal, TypeAlias
 
 import httpx
+from httpx._types import RequestFiles
 from pydantic import BaseModel, Field
 
 from pinnacle.ipfs.content.content import Content
@@ -16,26 +17,29 @@ class APIClient:
         self._client = client
 
     @staticmethod
-    def _prepare(endpoint: str, config: Config, **kwargs):
-        request_params = config.setup()
-        url = {"url": f"{config.url}/{endpoint}"}
+    def _prepare(endpoint: str, config: Config, query_params: dict):
+        request_params = {
+            "url": f"{config.url}/{endpoint}",
+            "params": query_params,
+        }
 
-        return url | request_params | kwargs
+        return request_params | config.setup()
 
-    def get(self, endpoint: str, config: Config, **kwargs):
-        params = self._prepare(endpoint, config, **kwargs)
+    def get(self, endpoint: str, config: Config, query_params: dict):
+        _params = self._prepare(endpoint, config, query_params)
 
-        return self._client.get(**params)
+        return self._client.get(**_params)
 
-    def post(self, endpoint: str, config: Config, **kwargs):
-        params = self._prepare(endpoint, config, **kwargs)
+    def post(
+        self,
+        endpoint: str,
+        config: Config,
+        query_params: dict,
+        files: RequestFiles | None = None,
+    ):
+        _params = self._prepare(endpoint, config, query_params)
 
-        return self._client.post(**params)
-
-    def delete(self, endpoint: str, config: Config, **kwargs):
-        params = self._prepare(endpoint, config, **kwargs)
-
-        return self._client.delete(**params)
+        return self._client.post(**_params, files=files)
 
 
 class PinAPI(ABC):

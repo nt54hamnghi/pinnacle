@@ -28,8 +28,8 @@ class LocalPin(PinAPI):
             raw = self.api_client.post(
                 endpoint="add",
                 config=self.config,
+                query_params={"cid-version": cid_version},
                 files=content.prepare(),
-                params={"cid-version": cid_version},
             )
             raw.raise_for_status()
         except httpx.ConnectError:
