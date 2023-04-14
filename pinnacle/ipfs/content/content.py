@@ -7,15 +7,29 @@ from anyio import AsyncFile
 from pinnacle.type_aliases import PathType
 
 
+class UnsupportedSubdomainGateway(Exception):
+    def __init__(self) -> None:
+        super().__init__("Gateway doesn't support subdomain type")
+
+
 class Gateway:
-    def __init__(self, gatewayURL: str) -> None:
+    def __init__(
+        self,
+        gatewayURL: str,
+        is_subdomain_supported: bool = False,
+        scheme: Literal["https", "http"] = "http",
+    ) -> None:
         self.gatewayURL = gatewayURL
+        self.is_subdomain_supported = is_subdomain_supported
+        self.scheme = scheme
 
     def path_gateway(self, cid: str):
-        return f"http://{self.gatewayURL}/ipfs/{cid}/"
+        return f"{self.scheme}://{self.gatewayURL}/ipfs/{cid}/"
 
     def subdomain_gateway(self, cid: str):
-        return f"http://{cid}.ipfs.{self.gatewayURL}/"
+        if not self.is_subdomain_supported:
+            raise UnsupportedSubdomainGateway
+        return f"{self.scheme}://{cid}.ipfs.{self.gatewayURL}/"
 
     def gateway(
         self,
@@ -33,13 +47,14 @@ class Gateway:
 
 
 GATEWAYS = {
-    "local": Gateway("localhost:8080"),
-    "local_ip": Gateway("127.0.0.1:8080"),
-    "ipfs": Gateway("ipfs.io"),
-    "nft_storage": Gateway("nftstorage.link"),
+    "local": Gateway("localhost:8080", True),
+    "local_ip": Gateway("127.0.0.1:8080", False),
+    "ipfs": Gateway("ipfs.io", True, "https"),
+    "pinata": Gateway("gateway.pinata.cloud", False, "https"),
+    "nft_storage": Gateway("nftstorage.link", True, "https"),
 }
 
-GatewayName = Literal["local", "local_ip", "ipfs", "nft_storage"]
+GatewayName = Literal["local", "local_ip", "ipfs", "nft_storage", "pinata"]
 
 
 class BaseContent:
