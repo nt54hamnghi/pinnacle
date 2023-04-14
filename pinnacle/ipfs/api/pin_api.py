@@ -1,13 +1,29 @@
 from abc import ABC, abstractmethod
-from typing import ClassVar, Literal
+from typing import ClassVar, Literal, TypeVar
 
 import httpx
-from httpx._types import RequestFiles
-
-from pinnacle.ipfs.content.content import Content
-from pinnacle.ipfs.model.model import PinStatus
+from httpx._types import (
+    HeaderTypes,
+    QueryParamTypes,
+    RequestData,
+    RequestFiles,
+)
+from pydantic import BaseModel
 
 from ..config import BearerAuth, Config
+from ..content import Content
+
+ModelT = TypeVar("ModelT", bound=BaseModel)
+
+
+def transform_response(
+    raw_response: httpx.Response,
+    response_model: type[ModelT],
+) -> ModelT:
+    """Static method to transfrom raw response to pydantic model"""
+    raw_response.raise_for_status()
+
+    return response_model(**raw_response.json())
 
 
 class BasePinAPI:
@@ -17,13 +33,16 @@ class BasePinAPI:
         self.config = self.global_config if config is None else config
 
     def _build_request_params(
-        self, endpoint: str, query_params: dict | None = None
+        self,
+        endpoint: str,
+        query_params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
     ):
-        request_params = {
-            "url": f"{self.config.url}/{endpoint}",
-            "params": query_params,
-        }
-
+        request_params = dict(
+            url=f"{self.config.url}/{endpoint}",
+            params=query_params,
+            headers=headers,
+        )
         return request_params | self.config.setup()
 
     def authenticate_with_token(self, token: str):
@@ -47,7 +66,7 @@ class PinAPI(BasePinAPI, ABC):
         self.api_client = api_client or httpx.Client()
 
     @abstractmethod
-    def add(self, content: Content, *, cid_version: int = 1) -> PinStatus:
+    def add(self, content: Content, *, cid_version: int = 1):
         ...
 
     def is_async_client(self):
@@ -64,11 +83,14 @@ class PinAPI(BasePinAPI, ABC):
         self,
         method: Literal["GET", "POST", "DELETE"],
         endpoint: str,
-        query_params: dict | None = None,
+        query_params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
         *args,
         **kwargs,
     ):
-        _params = self._build_request_params(endpoint, query_params) | kwargs
+        _params = self._build_request_params(endpoint, query_params, headers)
+        _params |= kwargs
+
         return self.api_client.request(method, *args, **_params)
 
     def _post(
@@ -76,9 +98,16 @@ class PinAPI(BasePinAPI, ABC):
         endpoint: str,
         *,
         files: RequestFiles | None = None,
+        data: RequestData | None = None,
         query_params: dict | None = None,
     ):
-        return self._request("POST", endpoint, query_params, files=files)
+        return self._request(
+            "POST",
+            endpoint,
+            query_params,
+            files=files,
+            data=data,
+        )
 
     def _get(
         self,
@@ -101,9 +130,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
         self.api_client = api_client or httpx.AsyncClient()
 
     @abstractmethod
-    async def add(
-        self, content: Content, *, cid_version: int = 1
-    ) -> PinStatus:
+    async def add(self, content: Content, *, cid_version: int = 1):
         ...
 
     async def __aenter__(self):
@@ -119,11 +146,14 @@ class AsyncPinAPI(BasePinAPI, ABC):
         self,
         method: Literal["GET", "POST", "DELETE"],
         endpoint: str,
-        query_params: dict | None = None,
+        query_params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
         *args,
         **kwargs,
     ):
-        _params = self._build_request_params(endpoint, query_params) | kwargs
+        _params = self._build_request_params(endpoint, query_params, headers)
+        _params |= kwargs
+
         return await self.api_client.request(method, *args, **_params)
 
     async def _post(
@@ -131,10 +161,15 @@ class AsyncPinAPI(BasePinAPI, ABC):
         endpoint: str,
         *,
         files: RequestFiles | None = None,
+        data: RequestData | None = None,
         query_params: dict | None = None,
     ):
         return await self._request(
-            "POST", endpoint, query_params, files=files
+            "POST",
+            endpoint,
+            query_params,
+            files=files,
+            data=data,
         )
 
     async def _get(
