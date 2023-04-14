@@ -46,13 +46,13 @@ class BearerAuth(httpx.Auth):
         yield request
 
     @classmethod
-    def from_env(cls, keyname: str) -> Self:
+    def from_env(cls, env_name: str) -> Self:
         """Alternative constructor to load from environment variable"""
         try:
-            return cls(_from_dot_env(keyname))
+            return cls(_from_dot_env(env_name))
         except ENVNotFound:
             try:
-                return cls(_from_os_env(keyname))
+                return cls(_from_os_env(env_name))
             except ENVNotFound:
                 raise AuthKeyNotFound
 
