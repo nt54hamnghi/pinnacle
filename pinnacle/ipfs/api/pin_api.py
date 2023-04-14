@@ -1,26 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Coroutine,
-    Literal,
-    TypeAlias,
-    cast,
-)
+from typing import ClassVar, Literal
 
 import httpx
 from httpx._types import RequestFiles
 
 from pinnacle.ipfs.content.content import Content
+from pinnacle.ipfs.model.model import PinStatus
 
 from ..config import BearerAuth, Config
-
-
-Dispatcher: TypeAlias = Callable[..., httpx.Response]
-AsyncDispatcher: TypeAlias = Callable[
-    ..., Coroutine[Any, Any, httpx.Response]
-]
 
 
 class BasePinAPI:
@@ -47,21 +34,6 @@ class BasePinAPI:
         auth = BearerAuth.from_env(env_name)
         self.config.update_authentication(auth)
 
-    @staticmethod
-    def _dispatch(
-        client: httpx.Client | httpx.AsyncClient,
-        method: Literal["GET", "POST", "DELETE"],
-    ):
-        match method:
-            case "GET":
-                return client.get
-            case "POST":
-                return client.post
-            case "DELETE":
-                return client.delete
-            case _:
-                raise ValueError(f"Unsupported HTTP method {method}")
-
 
 class PinAPI(BasePinAPI, ABC):
     global_config: ClassVar[Config]
@@ -75,7 +47,7 @@ class PinAPI(BasePinAPI, ABC):
         self.api_client = api_client or httpx.Client()
 
     @abstractmethod
-    def add(self, content: Content, *, cid_version: int = 1):
+    def add(self, content: Content, *, cid_version: int = 1) -> PinStatus:
         ...
 
     def is_async_client(self):
@@ -88,7 +60,7 @@ class PinAPI(BasePinAPI, ABC):
     def __exit__(self, exc_type, exc_instance, traceback):
         return self.api_client.__exit__(exc_type, exc_instance, traceback)
 
-    def _call_api(
+    def _request(
         self,
         method: Literal["GET", "POST", "DELETE"],
         endpoint: str,
@@ -97,8 +69,7 @@ class PinAPI(BasePinAPI, ABC):
         **kwargs,
     ):
         _params = self._build_request_params(endpoint, query_params) | kwargs
-        _dispatcher = PinAPI._dispatch(self.api_client, method)
-        return cast(Dispatcher, _dispatcher)(*args, **_params)
+        return self.api_client.request(method, *args, **_params)
 
     def _post(
         self,
@@ -107,7 +78,7 @@ class PinAPI(BasePinAPI, ABC):
         files: RequestFiles | None = None,
         query_params: dict | None = None,
     ):
-        return self._call_api("POST", endpoint, query_params, files=files)
+        return self._request("POST", endpoint, query_params, files=files)
 
     def _get(
         self,
@@ -115,7 +86,7 @@ class PinAPI(BasePinAPI, ABC):
         *,
         query_params: dict | None = None,
     ):
-        return self._call_api("GET", endpoint, query_params)
+        return self._request("GET", endpoint, query_params)
 
 
 class AsyncPinAPI(BasePinAPI, ABC):
@@ -130,7 +101,9 @@ class AsyncPinAPI(BasePinAPI, ABC):
         self.api_client = api_client or httpx.AsyncClient()
 
     @abstractmethod
-    async def add(self, content: Content, *, cid_version: int = 1):
+    async def add(
+        self, content: Content, *, cid_version: int = 1
+    ) -> PinStatus:
         ...
 
     async def __aenter__(self):
@@ -142,7 +115,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
             exc_type, exc_instance, traceback
         )
 
-    async def _call_api(
+    async def _request(
         self,
         method: Literal["GET", "POST", "DELETE"],
         endpoint: str,
@@ -151,8 +124,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
         **kwargs,
     ):
         _params = self._build_request_params(endpoint, query_params) | kwargs
-        _dispatcher = PinAPI._dispatch(self.api_client, method)
-        return await cast(AsyncDispatcher, _dispatcher)(*args, **_params)
+        return await self.api_client.request(method, *args, **_params)
 
     async def _post(
         self,
@@ -161,7 +133,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
         files: RequestFiles | None = None,
         query_params: dict | None = None,
     ):
-        return await self._call_api(
+        return await self._request(
             "POST", endpoint, query_params, files=files
         )
 
@@ -171,4 +143,4 @@ class AsyncPinAPI(BasePinAPI, ABC):
         *,
         query_params: dict | None = None,
     ):
-        return await self._call_api("GET", endpoint, query_params)
+        return await self._request("GET", endpoint, query_params)
