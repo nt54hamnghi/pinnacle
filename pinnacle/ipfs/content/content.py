@@ -83,8 +83,9 @@ class BaseContent:
     def mimetype(self) -> str:
         if self._mimetype_set:
             return self._mimetype
-        type, _ = mimetypes.guess_type(self.basename)
-        return type or self._mimetype
+        guess, _ = mimetypes.guess_type(self.basename)
+
+        return guess or self._mimetype
 
     @mimetype.setter
     def mimetype(self, value: str):
@@ -94,6 +95,9 @@ class BaseContent:
     @property
     def uri(self):
         """Gateway-agnostic URI"""
+        if not self.is_pinned or self.cid is None:
+            raise ValueError("Content is not pinned yet")
+
         return f"ipfs://{self.cid}"
 
     def pinned(self, cid: str):
