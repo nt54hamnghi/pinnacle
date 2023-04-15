@@ -26,10 +26,7 @@ class PinataAdd(BaseModel):
 
 
 class PinantaMixin(PinMixin):
-    global_config = Config(
-        url=PINATA_SERVICE,
-        # auth=BearerAuth.from_env("PINATA_JWT"),
-    )
+    global_config = Config(url=PINATA_SERVICE)
 
     def _add(
         self, content: Content, raw_response: httpx.Response, *args, **kwds

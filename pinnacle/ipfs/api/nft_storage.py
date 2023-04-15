@@ -38,10 +38,7 @@ class NFTStorageAdd(BaseModel):
 
 
 class NFTStorageMixin(PinMixin):
-    global_config = Config(
-        url=NFT_STORAGE_SERVICE,
-        # auth=BearerAuth.from_env("NFT_STORAGE_JWT"),
-    )
+    global_config = Config(url=NFT_STORAGE_SERVICE)
 
     def _add(
         self, content: Content, raw_response: httpx.Response, *args, **kwds

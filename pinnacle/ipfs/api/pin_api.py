@@ -5,9 +5,9 @@ import httpx
 from httpx._types import (
     HeaderTypes,
     QueryParamTypes,
+    RequestContent,
     RequestData,
     RequestFiles,
-    RequestContent,
 )
 from pydantic import BaseModel
 
