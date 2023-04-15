@@ -1,5 +1,6 @@
 from .local_pin import AsyncLocalPin, LocalPin
-from .pin_api import AsyncPinAPI, PinAPI, transform_response
+from .nft_storage import AsyncNFTStorage, NFTStorage
+from .pin_api import AsyncPinAPI, PinAPI, PinMixin
 from .pinata import AsyncPinata, Pinata
 
 __all__ = (
@@ -9,5 +10,7 @@ __all__ = (
     "AsyncLocalPin",
     "Pinata",
     "AsyncPinata",
-    "transform_response",
+    "PinMixin",
+    "AsyncNFTStorage",
+    "NFTStorage",
 )

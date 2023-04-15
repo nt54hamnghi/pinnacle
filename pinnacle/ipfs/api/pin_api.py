@@ -7,6 +7,7 @@ from httpx._types import (
     QueryParamTypes,
     RequestData,
     RequestFiles,
+    RequestContent,
 )
 from pydantic import BaseModel
 
@@ -14,16 +15,6 @@ from ..config import BearerAuth, Config
 from ..content import Content
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
-
-
-def transform_response(
-    raw_response: httpx.Response,
-    response_model: type[ModelT],
-) -> ModelT:
-    """Static method to transfrom raw response to pydantic model"""
-    raw_response.raise_for_status()
-
-    return response_model(**raw_response.json())
 
 
 class BasePinAPI:
@@ -97,25 +88,30 @@ class PinAPI(BasePinAPI, ABC):
         self,
         endpoint: str,
         *,
+        content: RequestContent | None = None,
         files: RequestFiles | None = None,
         data: RequestData | None = None,
-        query_params: dict | None = None,
+        query_params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
     ):
         return self._request(
             "POST",
             endpoint,
             query_params,
+            content=content,
             files=files,
             data=data,
+            headers=headers,
         )
 
     def _get(
         self,
         endpoint: str,
         *,
-        query_params: dict | None = None,
+        query_params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
     ):
-        return self._request("GET", endpoint, query_params)
+        return self._request("GET", endpoint, query_params, headers=headers)
 
 
 class AsyncPinAPI(BasePinAPI, ABC):
@@ -160,22 +156,56 @@ class AsyncPinAPI(BasePinAPI, ABC):
         self,
         endpoint: str,
         *,
+        content: RequestContent | None = None,
         files: RequestFiles | None = None,
         data: RequestData | None = None,
-        query_params: dict | None = None,
+        query_params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
     ):
         return await self._request(
             "POST",
             endpoint,
             query_params,
+            content=content,
             files=files,
             data=data,
+            headers=headers,
         )
 
     async def _get(
         self,
         endpoint: str,
         *,
-        query_params: dict | None = None,
+        query_params: QueryParamTypes | None = None,
+        headers: HeaderTypes | None = None,
     ):
-        return await self._request("GET", endpoint, query_params)
+        return await self._request(
+            "GET", endpoint, query_params, headers=headers
+        )
+
+
+class PinMixin:
+    """
+    A mixin class to reduce duplicated-code surface between sync and async version to simplify maintanance and ease effor to keep sync and async code in tandem.
+    """
+
+    @staticmethod
+    def transform_response(
+        raw_response: httpx.Response,
+        response_model: type[ModelT],
+    ) -> ModelT:
+        """Static method to transfrom raw response to pydantic model"""
+        raw_response.raise_for_status()
+
+        return response_model(**raw_response.json())
+
+    def _add(
+        self,
+        content: Content,
+        raw_response: httpx.Response,
+        response_model: type[ModelT],
+    ) -> ModelT:
+        response = self.transform_response(raw_response, response_model)
+        content.pinned(getattr(response, "cid"))
+
+        return response
