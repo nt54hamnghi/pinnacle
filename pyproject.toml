@@ -45,3 +45,7 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 # strictness
 strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--ignore=./legacy"]
