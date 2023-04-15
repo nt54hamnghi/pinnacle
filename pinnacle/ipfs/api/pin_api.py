@@ -44,6 +44,10 @@ class BasePinAPI:
         auth = BearerAuth.from_env(env_name)
         self.config.update_authentication(auth)
 
+    @property
+    def authless(self):
+        return self.config.authless
+
 
 class PinAPI(BasePinAPI, ABC):
     global_config: ClassVar[Config]
@@ -186,7 +190,8 @@ class AsyncPinAPI(BasePinAPI, ABC):
 
 class PinMixin:
     """
-    A mixin class to reduce duplicated-code surface between sync and async version to simplify maintanance and ease effor to keep sync and async code in tandem.
+    A mixin class to de-duplicate code surface between sync and async client,
+    easing the effor to keep sync and async code in tandem.
     """
 
     @staticmethod

@@ -1,12 +1,10 @@
 from datetime import datetime
-from pprint import pprint
-from xmlrpc.client import boolean
 
 import httpx
 from pydantic import BaseModel, Field
 
 from ...consts.pin_service import NFT_STORAGE_SERVICE
-from ..config import BearerAuth, Config
+from ..config import Config
 from ..content import Content
 from ..model.model import Pin
 from .pin_api import AsyncPinAPI, PinAPI, PinMixin
@@ -42,7 +40,7 @@ class NFTStorageAdd(BaseModel):
 class NFTStorageMixin(PinMixin):
     global_config = Config(
         url=NFT_STORAGE_SERVICE,
-        auth=BearerAuth.from_env("NFT_STORAGE_JWT"),
+        # auth=BearerAuth.from_env("NFT_STORAGE_JWT"),
     )
 
     def _add(

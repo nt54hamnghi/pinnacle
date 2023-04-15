@@ -23,7 +23,7 @@ class LocalPinAdd(BaseModel):
 
 
 class LocalPinMixin(PinMixin):
-    global_config = Config()
+    global_config = Config(authless=True)
 
     @staticmethod
     def ipfs_daemon_active() -> bool:

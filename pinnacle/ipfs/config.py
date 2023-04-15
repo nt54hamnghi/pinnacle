@@ -63,19 +63,21 @@ class Config:
         url: str = LOCAL_SERVICE,
         auth: httpx.Auth | None = None,
         extra_params: dict[str, Any] | None = None,
+        authless: bool = False,
     ) -> None:
         self.url = url
         self.auth = auth
+        self.authless = authless
         # extra_params is optional arguments of httpx methods.
         # https://www.python-httpx.org/api/#helper-functions
         self.extra_params = {} if extra_params is None else extra_params
 
     def update_authentication(self, auth: BearerAuth):
+        if self.authless:
+            raise ValueError(
+                "Cannot update authentication with an auth-less configuration"
+            )
         self.auth = auth
-
-    @property
-    def no_authentication(self) -> bool:
-        return self.auth is None
 
     def update_params(self, params: dict[str, Any]) -> None:
         self.extra_params.update(params)

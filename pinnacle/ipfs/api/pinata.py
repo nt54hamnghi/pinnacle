@@ -5,7 +5,7 @@ import httpx
 from pydantic import BaseModel, Field
 
 from ...consts import PINATA_SERVICE
-from ..config import BearerAuth, Config
+from ..config import Config
 from ..content import Content
 from .pin_api import AsyncPinAPI, PinAPI, PinMixin
 
@@ -28,7 +28,7 @@ class PinataAdd(BaseModel):
 class PinantaMixin(PinMixin):
     global_config = Config(
         url=PINATA_SERVICE,
-        auth=BearerAuth.from_env("PINATA_JWT"),
+        # auth=BearerAuth.from_env("PINATA_JWT"),
     )
 
     def _add(
