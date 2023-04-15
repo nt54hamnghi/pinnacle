@@ -4,7 +4,7 @@ from datetime import datetime
 import httpx
 from pydantic import BaseModel, Field
 
-from ...consts import PINATA_SERVICE
+from ...constants import PINATA_SERVICE
 from ..config import Config
 from ..content import Content
 from .pin_api import AsyncPinAPI, PinAPI, PinMixin

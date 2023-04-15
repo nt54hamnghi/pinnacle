@@ -3,7 +3,7 @@ from datetime import datetime
 import httpx
 from pydantic import BaseModel, Field
 
-from ...consts.pin_service import NFT_STORAGE_SERVICE
+from ...constants.pin_services import NFT_STORAGE_SERVICE
 from ..config import Config
 from ..content import Content
 from ..model.model import Pin

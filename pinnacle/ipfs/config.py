@@ -5,7 +5,7 @@ import httpx
 from dotenv import dotenv_values
 from httpx import Request, Response
 
-from pinnacle.consts.pin_service import LOCAL_SERVICE
+from pinnacle.constants.pin_services import LOCAL_SERVICE
 
 
 class ENVNotFound(KeyError):

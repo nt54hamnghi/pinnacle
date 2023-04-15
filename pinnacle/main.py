@@ -3,7 +3,7 @@ from typing import Callable
 
 import anyio
 
-from pinnacle.consts.dirs import IMG_DIR
+from pinnacle.constants.dirs import IMG_DIR
 from pinnacle.ipfs.api.local_pin import AsyncLocalPin, LocalPin
 from pinnacle.ipfs.api.nft_storage import AsyncNFTStorage, NFTStorage
 from pinnacle.ipfs.api.pin_api import AsyncPinAPI, PinAPI
