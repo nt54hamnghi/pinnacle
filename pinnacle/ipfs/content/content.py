@@ -52,10 +52,13 @@ GATEWAYS = {
     "local_ip": Gateway("127.0.0.1:8080", False),
     "ipfs": Gateway("ipfs.io", True, "https"),
     "pinata": Gateway("gateway.pinata.cloud", False, "https"),
-    "nft_storage": Gateway("nftstorage.link", True, "https"),
+    "nftstorage": Gateway("nftstorage.link", True, "https"),
+    "w3s": Gateway("w3s.link", True, "https"),
 }
 
-GatewayName = Literal["local", "local_ip", "ipfs", "nft_storage", "pinata"]
+GatewayName = Literal[
+    "local", "local_ip", "ipfs", "nftstorage", "pinata", "w3s"
+]
 
 
 class BaseContent:

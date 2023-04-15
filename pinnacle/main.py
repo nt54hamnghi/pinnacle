@@ -21,7 +21,7 @@ def pin(Pinner: type[PinAPI], env: str | None = None, verbose: bool = True):
             pin_status = pin_api.add(content)
 
             if verbose:
-                print("\n", content.gateway("local"), end="\n\n")
+                print("\n" + content.gateway("local"), end="\n\n")
 
             return pin_status
 
@@ -38,7 +38,7 @@ async def async_pin(
             pin_status = await pin_api.add(content)
 
             if verbose:
-                print("\n", content.gateway("local"), end="\n\n")
+                print("\n" + content.gateway("local"), end="\n\n")
 
             return pin_status
 
