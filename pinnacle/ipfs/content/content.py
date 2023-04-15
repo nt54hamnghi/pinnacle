@@ -1,3 +1,4 @@
+import mimetypes
 import posixpath
 from typing import IO, Literal, cast
 
@@ -58,20 +59,32 @@ GatewayName = Literal["local", "local_ip", "ipfs", "nft_storage", "pinata"]
 
 
 class BaseContent:
-    def __init__(
-        self, path: PathType, mimetype: str = "application/octet-stream"
-    ) -> None:
+    def __init__(self, path: PathType) -> None:
         self.path = path
-        self.mimetype = mimetype
         self.is_pinned = False
         self.cid: str | None = None
 
         self._file: IO[bytes] | AsyncFile[bytes] | None = None
         self._bytes: bytes | None = None
 
+        self._mimetype = "application/octet-stream"
+        self._mimetype_set = False
+
     @property
     def basename(self) -> str:
         return posixpath.basename(self.path)
+
+    @property
+    def mimetype(self) -> str:
+        if self._mimetype_set:
+            return self._mimetype
+        type, _ = mimetypes.guess_type(self.basename)
+        return type or self._mimetype
+
+    @mimetype.setter
+    def mimetype(self, value: str):
+        self._mimetype = value
+        self._mimetype_set = True
 
     @property
     def uri(self):
@@ -82,12 +95,29 @@ class BaseContent:
         self.is_pinned = True
         self.cid = cid
 
-    def prepare(self) -> dict[str, tuple[str, bytes]]:
-        """Prepare a dict containing fields ready for pinning"""
+    def _prepare(self):
+        """Prepare the content for pinning request"""
+
         if self._bytes is None:
             raise ValueError("Content's bytes has not been read")
 
-        return dict(file=(self.basename, self._bytes))
+        return dict(
+            content=self._bytes,
+            headers={"Content-Type": self.mimetype},
+        )
+
+    def _prepare_multipart(self, include_mimetype: bool = False):
+        """Prepare the content for MULTIPART pinning request"""
+
+        if self._bytes is None:
+            raise ValueError("Content's bytes has not been read")
+
+        if include_mimetype:
+            files = {"file": (self.basename, self._bytes, self.mimetype)}
+        else:
+            files = {"file": (self.basename, self._bytes)}  # type: ignore
+
+        return dict(files=files)
 
     def gateway(
         self,

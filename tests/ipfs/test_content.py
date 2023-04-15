@@ -57,4 +57,4 @@ def test_fail_get_gateway(path):
 def test_prepare(path):
     content = Content(path[0], "application/json")
     expected = dict(file=(path[1], content.read(), "application/json"))
-    assert content.prepare() == expected
+    assert content._prepare_multipart() == expected

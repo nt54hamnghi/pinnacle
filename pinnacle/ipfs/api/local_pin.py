@@ -1,20 +1,17 @@
-from datetime import datetime
-
 import httpx
 import psutil
 from pydantic import BaseModel, Field
 
 from ..config import Config
 from ..content import Content
-from ..model.model import Delegates, Pin, PinStatus, Status
-from .pin_api import AsyncPinAPI, PinAPI, transform_response
+from .pin_api import AsyncPinAPI, PinAPI, PinMixin
 
 
 class NoIPFSDaemonError(Exception):
     ...
 
 
-class LocalPinAddResponse(BaseModel):
+class LocalPinAdd(BaseModel):
     Name: str
     Hash: str
     Size: int = Field(gt=0)
@@ -25,7 +22,7 @@ class LocalPinAddResponse(BaseModel):
         return self.Hash
 
 
-class LocalPinMixin:
+class LocalPinMixin(PinMixin):
     global_config = Config()
 
     @staticmethod
@@ -33,12 +30,10 @@ class LocalPinMixin:
         """Check if ipfs daemon is running"""
         return "ipfs" in {p.name() for p in psutil.process_iter()}
 
-    @staticmethod
-    def _add(content: Content, raw_response: httpx.Response):
-        response = transform_response(raw_response, LocalPinAddResponse)
-        content.pinned(response.cid)
-
-        return response
+    def _add(
+        self, content: Content, raw_response: httpx.Response, *args, **kwds
+    ):
+        return super()._add(content, raw_response, LocalPinAdd)
 
 
 class LocalPin(LocalPinMixin, PinAPI):
@@ -48,8 +43,8 @@ class LocalPin(LocalPinMixin, PinAPI):
 
         raw = self._post(
             "add",
-            files=content.prepare(),
             query_params={"cid-version": cid_version},
+            **content._prepare_multipart(),
         )
 
         return self._add(content, raw)
@@ -62,8 +57,8 @@ class AsyncLocalPin(LocalPinMixin, AsyncPinAPI):
 
         raw = await self._post(
             "add",
-            files=content.prepare(),
             query_params={"cid-version": cid_version},
+            **content._prepare_multipart(),
         )
 
         return self._add(content, raw)

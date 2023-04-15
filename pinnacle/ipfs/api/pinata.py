@@ -7,10 +7,10 @@ from pydantic import BaseModel, Field
 from ...consts import PINATA_SERVICE
 from ..config import BearerAuth, Config
 from ..content import Content
-from .pin_api import AsyncPinAPI, PinAPI, transform_response
+from .pin_api import AsyncPinAPI, PinAPI, PinMixin
 
 
-class PinataAddResponse(BaseModel):
+class PinataAdd(BaseModel):
     IpfsHash: str = Field(description="IPFS multi-hash for the content")
     PinSize: int = Field(
         description="The pinned content size (in bytes)", gt=0
@@ -25,25 +25,25 @@ class PinataAddResponse(BaseModel):
         return self.IpfsHash
 
 
-class PinantaMixin:
+class PinantaMixin(PinMixin):
     global_config = Config(
         url=PINATA_SERVICE,
         auth=BearerAuth.from_env("PINATA_JWT"),
     )
 
-    @staticmethod
-    def _add(content: Content, raw_response: httpx.Response):
-        response = transform_response(raw_response, PinataAddResponse)
-        content.pinned(response.cid)
-
-        return response
+    def _add(
+        self, content: Content, raw_response: httpx.Response, *args, **kwds
+    ):
+        return super()._add(content, raw_response, PinataAdd)
 
 
 class Pinata(PinantaMixin, PinAPI):
     def add(self, content: Content, *, cid_version: int = 1):
         payload = {"pinataOptions": json.dumps({"cidVersion": cid_version})}
         raw = self._post(
-            "pinning/pinFileToIPFS", files=content.prepare(), data=payload
+            "pinning/pinFileToIPFS",
+            data=payload,
+            **content._prepare_multipart()
         )
 
         return self._add(content, raw)
@@ -53,7 +53,9 @@ class AsyncPinata(PinantaMixin, AsyncPinAPI):
     async def add(self, content: Content, *, cid_version: int = 1):
         payload = {"pinataOptions": json.dumps({"cidVersion": cid_version})}
         raw = await self._post(
-            "pinning/pinFileToIPFS", files=content.prepare(), data=payload
+            "pinning/pinFileToIPFS",
+            data=payload,
+            **content._prepare_multipart()
         )
 
         return self._add(content, raw)
