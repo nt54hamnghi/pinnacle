@@ -56,6 +56,7 @@ GATEWAYS = {
     "w3s": Gateway("w3s.link", True, "https"),
 }
 
+
 GatewayName = Literal[
     "local", "local_ip", "ipfs", "nftstorage", "pinata", "w3s"
 ]
@@ -67,6 +68,7 @@ class BaseContent:
         self.is_pinned = False
         self.cid: str | None = None
 
+        self._gateway: Gateway | None = None
         self._file: IO[bytes] | AsyncFile[bytes] | None = None
         self._bytes: bytes | None = None
 
@@ -122,16 +124,22 @@ class BaseContent:
 
         return dict(files=files)
 
-    def gateway(
+    def register_gateway(self, gateway: Gateway):
+        """Register a new gateway to use when calling get_gateway"""
+        self._gateway = gateway
+
+    def get_gateway(
         self,
         gateway_name: GatewayName = "ipfs",
         gateway_type: Literal["path", "subdomain"] = "path",
     ):
         """Generate an IPFS-compatible url to view content"""
-        if not self.is_pinned:
+        if not self.is_pinned or self.cid is None:
             raise ValueError("Content is not pinned yet")
-        if self.cid is None:
-            raise ValueError
+
+        if self._gateway is not None:
+            return self._gateway.gateway(self.cid, gateway_type)
+
         try:
             gateway = GATEWAYS[gateway_name]
         except KeyError:
