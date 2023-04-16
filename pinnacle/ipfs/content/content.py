@@ -13,6 +13,13 @@ class UnsupportedSubdomainGateway(Exception):
         super().__init__("Gateway doesn't support subdomain type")
 
 
+class InvalidGatewayException(ValueError):
+    def __init__(self) -> None:
+        super().__init__(
+            'Invalid gateway option. Available option: ["path", "subdomain"]'
+        )
+
+
 class Gateway:
     def __init__(
         self,
@@ -42,9 +49,7 @@ class Gateway:
         elif option == "subdomain":
             return self.subdomain_gateway(cid)
         else:
-            raise ValueError(
-                'Invalid gateway option. Available option: ["path", "subdomain"]'
-            )
+            raise InvalidGatewayException
 
 
 GATEWAYS = {
@@ -100,7 +105,7 @@ class BaseContent:
 
         return f"ipfs://{self.cid}"
 
-    def pinned(self, cid: str):
+    def set_pinned_status(self, cid: str):
         self.is_pinned = True
         self.cid = cid
 
@@ -128,28 +133,32 @@ class BaseContent:
 
         return dict(files=files)
 
-    def register_gateway(self, gateway: Gateway):
+    def add_gateway(self, gateway: Gateway):
         """Register a new gateway to use when calling get_gateway"""
         self._gateway = gateway
 
+    def remove_gateway(self):
+        self._gateway = None
+
     def get_gateway(
         self,
-        gateway_name: GatewayName = "ipfs",
-        gateway_type: Literal["path", "subdomain"] = "path",
+        *,
+        name: GatewayName = "ipfs",
+        type: Literal["path", "subdomain"] = "path",
     ):
         """Generate an IPFS-compatible url to view content"""
         if not self.is_pinned or self.cid is None:
             raise ValueError("Content is not pinned yet")
 
         if self._gateway is not None:
-            return self._gateway.gateway(self.cid, gateway_type)
+            return self._gateway.gateway(self.cid, type)
 
         try:
-            gateway = GATEWAYS[gateway_name]
+            gateway = GATEWAYS[name]
         except KeyError:
             raise ValueError(f"Invalid gateway. Available: {GATEWAYS.keys}")
         else:
-            return gateway.gateway(self.cid, gateway_type)
+            return gateway.gateway(self.cid, type)
 
 
 class Content(BaseContent):

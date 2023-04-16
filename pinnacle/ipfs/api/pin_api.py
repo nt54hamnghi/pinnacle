@@ -211,6 +211,6 @@ class PinMixin:
         response_model: type[ModelT],
     ) -> ModelT:
         response = self.transform_response(raw_response, response_model)
-        content.pinned(getattr(response, "cid"))
+        content.set_pinned_status(getattr(response, "cid"))
 
         return response

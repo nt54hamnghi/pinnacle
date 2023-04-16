@@ -28,7 +28,7 @@ def pin(Pinner: type[PinAPI], env: str | None = None, verbose: bool = True):
             pin_status = pin_api.add(content)
 
             if verbose:
-                print("\n" + content.get_gateway("w3s"), end="\n\n")
+                print(f'\n{content.get_gateway(name="local")}\n')
 
             return pin_status
 
@@ -44,7 +44,7 @@ async def async_pin(
             pin_status = await pin_api.add(content)
 
             if verbose:
-                print("\n" + content.get_gateway("local"), end="\n\n")
+                print(f'\n{content.get_gateway(name="local")}\n')
 
             return pin_status
 
@@ -88,4 +88,4 @@ def main(func: Callable):
 
 
 if __name__ == "__main__":
-    main(web3_storage)
+    main(pinata)

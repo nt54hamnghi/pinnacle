@@ -1,4 +1,4 @@
-from .content import AsyncContent, Content, Gateway, GATEWAYS
+from .content import GATEWAYS, AsyncContent, Content, Gateway
 
 __all__ = (
     "Content",
