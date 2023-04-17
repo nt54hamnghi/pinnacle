@@ -1,8 +1,8 @@
-from .content import GATEWAYS, AsyncContent, Content, Gateway
+from .content import GATEWAYS_STORE, AsyncContent, Content, Gateway
 
 __all__ = (
     "Content",
     "AsyncContent",
     "Gateway",
-    "GATEWAYS",
+    "GATEWAYS_STORE",
 )

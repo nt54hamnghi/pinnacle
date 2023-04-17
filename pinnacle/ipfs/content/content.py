@@ -1,3 +1,4 @@
+from io import UnsupportedOperation
 import mimetypes
 import posixpath
 from typing import IO, Literal, cast
@@ -52,14 +53,19 @@ class Gateway:
             raise InvalidGatewayException
 
 
-GATEWAYS = {
+SUBDOMAIN_SUPPORTED_GATEWAYS = {
     "local": Gateway("localhost:8080", True),
-    "local_ip": Gateway("127.0.0.1:8080", False),
     "ipfs": Gateway("ipfs.io", True, "https"),
-    "pinata": Gateway("gateway.pinata.cloud", False, "https"),
     "nftstorage": Gateway("nftstorage.link", True, "https"),
     "w3s": Gateway("w3s.link", True, "https"),
 }
+
+GATEWAYS = {
+    "local_ip": Gateway("127.0.0.1:8080"),
+    "pinata": Gateway("gateway.pinata.cloud", scheme="https"),
+}
+
+GATEWAYS_STORE = GATEWAYS | SUBDOMAIN_SUPPORTED_GATEWAYS
 
 
 GatewayName = Literal[
@@ -83,6 +89,14 @@ class BaseContent:
     @property
     def basename(self) -> str:
         return posixpath.basename(self.path)
+
+    @property
+    def opened(self):
+        return self._file is not None
+
+    @property
+    def closed(self):
+        return self._file is not None and self._file.closed
 
     @property
     def mimetype(self) -> str:
@@ -154,9 +168,11 @@ class BaseContent:
             return self._gateway.gateway(self.cid, type)
 
         try:
-            gateway = GATEWAYS[name]
+            gateway = GATEWAYS_STORE[name]
         except KeyError:
-            raise ValueError(f"Invalid gateway. Available: {GATEWAYS.keys}")
+            raise ValueError(
+                f"Invalid gateway. Available: {GATEWAYS_STORE.keys}"
+            )
         else:
             return gateway.gateway(self.cid, type)
 
@@ -165,15 +181,17 @@ class Content(BaseContent):
     """Content Object with IPFS object properties."""
 
     def open(self):
-        if self._file is not None:
-            raise ValueError("File is already opened")
+        if self.opened:
+            raise UnsupportedOperation("Content is already opened")
+
         self._file = open(self.path, "rb")
         self._bytes = self._file.read()
         return self
 
     def close(self):
-        if self._file is None:
-            raise ValueError("Content is not yet opened")
+        if not self.opened:
+            raise UnsupportedOperation("Content is not yet opened")
+
         cast(IO[bytes], self._file).close()
 
     def __enter__(self):
@@ -182,7 +200,7 @@ class Content(BaseContent):
     def __exit__(self, exc_type, exc_instance, traceback):
         self.close()
         # depending on whether an exception was raised or not (in the with block)
-        # True: exception did not happend or had been handled, no need to re-raise
+        # True: exception did not happen or had been handled, no need to re-raise
         # False: re-raise the exception
         return exc_instance is None
 
@@ -191,16 +209,16 @@ class AsyncContent(BaseContent):
     """Content Object with IPFS object properties."""
 
     async def open(self):
-        if self._file is not None:
-            raise ValueError("File is already opened")
+        if self.opened:
+            raise UnsupportedOperation("Content is already opened")
 
         self._file = await anyio.open_file(self.path, "rb")
         self._bytes = await self._file.read()
         return self
 
     async def close(self):
-        if self._file is None:
-            raise ValueError("Content is not yet opened")
+        if not self.opened:
+            raise UnsupportedOperation("Content is not yet opened")
 
         await cast(AsyncFile[bytes], self._file).aclose()
 

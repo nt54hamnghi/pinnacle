@@ -21,10 +21,10 @@ from pinnacle.ipfs.content import AsyncContent, Content
 
 def pin(Pinner: type[PinAPI], env: str | None = None, verbose: bool = True):
     with Pinner() as pin_api:
-        if not pin_api.authless:
-            pin_api.authenticate_with_env(env)
-
         with Content(IMG_DIR / "han.png") as content:
+            if not pin_api.authless:
+                pin_api.authenticate_with_env(env)
+
             pin_status = pin_api.add(content)
 
             if verbose:
@@ -37,10 +37,10 @@ async def async_pin(
     Pinner: type[AsyncPinAPI], env: str | None = None, verbose: bool = True
 ):
     async with Pinner() as pin_api:
-        if not pin_api.authless:
-            pin_api.authenticate_with_env(env)
-
         async with AsyncContent(IMG_DIR / "kai.png") as content:
+            if not pin_api.authless:
+                pin_api.authenticate_with_env(env)
+
             pin_status = await pin_api.add(content)
 
             if verbose:
