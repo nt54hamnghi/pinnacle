@@ -32,7 +32,7 @@ def async_content(img_path):
 async def test_async_content(async_content: AsyncContent):
     try:
         await async_content.open()
-    except:
+    except:  # pragma: no cover
         pass
     else:
         assert async_content.opened

@@ -26,7 +26,7 @@ def content(img_path: ImgPathFixture):
 def test_content(content: Content):
     try:
         content.open()
-    except:
+    except:  # pragma: no cover
         pass
     else:
         assert content.opened
