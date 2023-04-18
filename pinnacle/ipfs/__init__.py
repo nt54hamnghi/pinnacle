@@ -10,18 +10,18 @@
 # )
 
 from pinnacle.ipfs.config import (
-    AuthKeyNotFound,
+    AuthKeyNotFoundError,
     BearerAuth,
     Config,
-    ENVNotFound,
+    ENVNotFoundError,
 )
 from pinnacle.ipfs.content.content import Content
 
 __all__ = [
     "BearerAuth",
-    "AuthKeyNotFound",
+    "AuthKeyNotFoundError",
     "Config",
-    "ENVNotFound",
+    "ENVNotFoundError",
     "Content",
     # "pin",
     # "_pin",

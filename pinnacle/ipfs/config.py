@@ -8,17 +8,17 @@ from httpx import Request, Response
 from pinnacle.constants.pin_services import LOCAL_SERVICE
 
 
-class ENVNotFound(KeyError):
+class ENVNotFoundError(KeyError):
     pass
 
 
-class AuthKeyNotFound(ENVNotFound):
+class AuthKeyNotFoundError(ENVNotFoundError):
     pass
 
 
 def _from_os_env(env_name: str) -> str:
     if (env_var := os.getenv(env_name)) is None:
-        raise ENVNotFound(env_name)
+        raise ENVNotFoundError(env_name)
     return env_var
 
 
@@ -26,7 +26,7 @@ def _from_dot_env(env_name: str):
     try:
         return dotenv_values(".env")[env_name]
     except KeyError:
-        raise ENVNotFound(env_name)
+        raise ENVNotFoundError(env_name)
 
 
 class BearerAuth(httpx.Auth):
@@ -50,11 +50,11 @@ class BearerAuth(httpx.Auth):
         """Alternative constructor to load from environment variable"""
         try:
             return cls(_from_dot_env(env_name))
-        except ENVNotFound:
+        except ENVNotFoundError:
             try:
                 return cls(_from_os_env(env_name))
-            except ENVNotFound:
-                raise AuthKeyNotFound
+            except ENVNotFoundError:
+                raise AuthKeyNotFoundError
 
 
 class Config:
