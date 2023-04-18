@@ -51,3 +51,8 @@ def test_reopen_fail(img_path: ImgPathFixture):
     with Content(path) as content:
         with pytest.raises(UnsupportedOperation):
             content.open()
+
+
+def test_close_before_open(content: Content):
+    with pytest.raises(UnsupportedOperation):
+        content.close()

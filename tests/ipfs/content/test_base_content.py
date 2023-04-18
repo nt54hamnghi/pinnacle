@@ -152,8 +152,22 @@ def test_content_add_gateway(base_content: BaseContent):
     )
 
 
-def test_get_gateway_fail(base_content: BaseContent):
+def test_content_remove_gateway(base_content: BaseContent):
+    base_content.add_gateway(Gateway("test"))
+    base_content.remove_gateway()
+
+    assert base_content._gateway is None
+
+
+def test_get_gateway_fail_unpinned(base_content: BaseContent):
     with pytest.raises(ValueError) as error:
         base_content.get_gateway()
 
     assert error.match("Content is not pinned yet")
+
+
+def test_get_gateway_fail_invalid_name(base_content: BaseContent):
+    base_content.set_pinned_status(CID)
+
+    with pytest.raises(ValueError):
+        base_content.get_gateway(name="none")

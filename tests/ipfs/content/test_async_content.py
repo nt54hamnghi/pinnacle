@@ -59,3 +59,9 @@ async def test_async_reopen_fail(img_path: ImgPathFixture):
     async with AsyncContent(path) as content:
         with pytest.raises(UnsupportedOperation):
             await content.open()
+
+
+@pytest.mark.anyio
+async def test_close_before_open(async_content: AsyncContent):
+    with pytest.raises(UnsupportedOperation):
+        await async_content.close()
