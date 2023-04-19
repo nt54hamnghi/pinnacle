@@ -64,9 +64,6 @@ class PinAPI(BasePinAPI, ABC):
     def add(self, content: Content, *, cid_version: int = 1):
         ...
 
-    def is_async_client(self):
-        return isinstance(self, httpx.AsyncClient)
-
     def __enter__(self):
         self.api_client.__enter__()
         return self

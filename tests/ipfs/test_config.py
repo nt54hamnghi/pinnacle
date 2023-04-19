@@ -1,14 +1,15 @@
 from unittest import mock
-from httpx import Request
+
 import pytest
+from httpx import Request
 
 from pinnacle.ipfs.config import (
+    AuthKeyNotFoundError,
+    BearerAuth,
+    Config,
     ENVNotFoundError,
     _from_dot_env,
     _from_os_env,
-    BearerAuth,
-    AuthKeyNotFoundError,
-    Config,
 )
 
 TEST_JWT = "d8a29446d9418907d51b9f146bdd0e8456e7d0cbe09cba0238df003a69f13289"

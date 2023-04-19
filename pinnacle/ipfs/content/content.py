@@ -1,6 +1,6 @@
-from io import UnsupportedOperation
 import mimetypes
 import posixpath
+from io import UnsupportedOperation
 from typing import IO, Literal, cast
 
 import anyio
