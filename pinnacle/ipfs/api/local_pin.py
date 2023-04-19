@@ -1,10 +1,13 @@
 import httpx
 import psutil
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 from ..config import Config
 from ..content import Content
-from .pin_api import AsyncPinAPI, PinAPI, PinMixin
+from .pin_api import AsyncPinAPI
+from .pin_api import PinAPI
+from .pin_api import PinMixin
 
 
 class NoIPFSDaemonError(Exception):
@@ -30,9 +33,7 @@ class LocalPinMixin(PinMixin):
         """Check if ipfs daemon is running"""
         return "ipfs" in {p.name() for p in psutil.process_iter()}
 
-    def _add(
-        self, content: Content, raw_response: httpx.Response, *args, **kwds
-    ):
+    def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
         return super()._add(content, raw_response, LocalPinAdd)
 
 

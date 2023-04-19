@@ -1,10 +1,15 @@
 import datetime
-from enum import StrEnum, auto
-from posixpath import exists, isfile
+from enum import auto
+from enum import StrEnum
+from posixpath import exists
+from posixpath import isfile
 from typing import Literal
 
 import pydantic
-from pydantic import BaseModel, Field, HttpUrl, parse_obj_as
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import HttpUrl
+from pydantic import parse_obj_as
 
 from pinnacle.type_aliases import PathType
 
@@ -29,9 +34,7 @@ class NumberTrail(Trail):
     def is_value_less_than_max(cls, values):
         value, max = values["value"], values["max_value"]
         if value > max:
-            raise ValueError(
-                f"Invalid value of. Cannot be larger than max_value {max}"
-            )
+            raise ValueError(f"Invalid value of. Cannot be larger than max_value {max}")
         return values
 
 

@@ -1,22 +1,21 @@
+from collections.abc import Callable
 from pprint import pprint
-from typing import Callable
 
 import anyio
 
 from pinnacle.constants.dirs import IMG_DIR
-from pinnacle.ipfs.api import (
-    AsyncLocalPin,
-    AsyncNFTStorage,
-    AsyncPinAPI,
-    AsyncPinata,
-    AsyncWeb3Storage,
-    LocalPin,
-    NFTStorage,
-    PinAPI,
-    Pinata,
-    Web3Storage,
-)
-from pinnacle.ipfs.content import AsyncContent, Content
+from pinnacle.ipfs.api import AsyncLocalPin
+from pinnacle.ipfs.api import AsyncNFTStorage
+from pinnacle.ipfs.api import AsyncPinAPI
+from pinnacle.ipfs.api import AsyncPinata
+from pinnacle.ipfs.api import AsyncWeb3Storage
+from pinnacle.ipfs.api import LocalPin
+from pinnacle.ipfs.api import NFTStorage
+from pinnacle.ipfs.api import PinAPI
+from pinnacle.ipfs.api import Pinata
+from pinnacle.ipfs.api import Web3Storage
+from pinnacle.ipfs.content import AsyncContent
+from pinnacle.ipfs.content import Content
 
 
 def pin(Pinner: type[PinAPI], env: str | None = None, verbose: bool = True):
@@ -77,9 +76,7 @@ def web3_storage():
     response = pin(Web3Storage, env="WEB3_STORAGE_JWT")
     pprint(response)
 
-    async_response = anyio.run(
-        async_pin, AsyncWeb3Storage, "WEB3_STORAGE_JWT"
-    )
+    async_response = anyio.run(async_pin, AsyncWeb3Storage, "WEB3_STORAGE_JWT")
     pprint(async_response)
 
 

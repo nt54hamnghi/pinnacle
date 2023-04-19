@@ -1,9 +1,12 @@
 import os
-from typing import Any, Generator, Self
+from collections.abc import Generator
+from typing import Any
+from typing import Self
 
 import httpx
 from dotenv import dotenv_values
-from httpx import Request, Response
+from httpx import Request
+from httpx import Response
 
 from pinnacle.constants.pin_services import LOCAL_SERVICE
 
@@ -38,9 +41,7 @@ class BearerAuth(httpx.Auth):
         """Authentication property. Formated to be ready for request"""
         return f"Bearer {self.token}" if self.token else None
 
-    def auth_flow(
-        self, request: Request
-    ) -> Generator[Request, Response, None]:
+    def auth_flow(self, request: Request) -> Generator[Request, Response, None]:
         if self.bearer_token:
             request.headers["Authorization"] = self.bearer_token
         yield request

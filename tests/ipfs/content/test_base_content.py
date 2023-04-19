@@ -1,18 +1,17 @@
 from itertools import product
 from pathlib import Path
-from typing import Literal, TypeAlias
+from typing import Literal
+from typing import TypeAlias
 from unittest import mock
 
 import pytest
 
 from pinnacle.constants import IMG_DIR
 from pinnacle.ipfs.content import Gateway
-from pinnacle.ipfs.content.content import (
-    GATEWAYS,
-    GATEWAYS_STORE,
-    SUBDOMAIN_SUPPORTED_GATEWAYS,
-    BaseContent,
-)
+from pinnacle.ipfs.content.content import BaseContent
+from pinnacle.ipfs.content.content import GATEWAYS
+from pinnacle.ipfs.content.content import GATEWAYS_STORE
+from pinnacle.ipfs.content.content import SUBDOMAIN_SUPPORTED_GATEWAYS
 
 CID = "bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4"
 
@@ -40,9 +39,7 @@ def base_content(img_path):
     return BaseContent(path)
 
 
-def test_content_basename(
-    base_content: BaseContent, img_path: ImgPathFixture
-):
+def test_content_basename(base_content: BaseContent, img_path: ImgPathFixture):
     filename = img_path[1]
     assert base_content.basename == filename
 
@@ -147,9 +144,7 @@ def test_content_add_gateway(base_content: BaseContent):
     base_content.set_pinned_status(CID)
 
     assert base_content.get_gateway(type="path") == PATH_GATEWAY_HTTPS
-    assert (
-        base_content.get_gateway(type="subdomain") == SUBDOMAIN_GATEWAY_HTTPS
-    )
+    assert base_content.get_gateway(type="subdomain") == SUBDOMAIN_GATEWAY_HTTPS
 
 
 def test_content_remove_gateway(base_content: BaseContent):

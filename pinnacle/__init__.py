@@ -1,4 +1,5 @@
-from pinnacle import ipfs, metadata
+from pinnacle import ipfs
+from pinnacle import metadata
 
 __all__ = ["ipfs", "metadata"]
 __version__ = "0.1.0"

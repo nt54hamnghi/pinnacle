@@ -1,17 +1,19 @@
-from abc import ABC, abstractmethod
-from typing import ClassVar, Literal, TypeVar
+from abc import ABC
+from abc import abstractmethod
+from typing import ClassVar
+from typing import Literal
+from typing import TypeVar
 
 import httpx
-from httpx._types import (
-    HeaderTypes,
-    QueryParamTypes,
-    RequestContent,
-    RequestData,
-    RequestFiles,
-)
+from httpx._types import HeaderTypes
+from httpx._types import QueryParamTypes
+from httpx._types import RequestContent
+from httpx._types import RequestData
+from httpx._types import RequestFiles
 from pydantic import BaseModel
 
-from ..config import BearerAuth, Config
+from ..config import BearerAuth
+from ..config import Config
 from ..content import Content
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -135,9 +137,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
         return self
 
     async def __aexit__(self, exc_type, exc_instance, traceback):
-        return await self.api_client.__aexit__(
-            exc_type, exc_instance, traceback
-        )
+        return await self.api_client.__aexit__(exc_type, exc_instance, traceback)
 
     async def _request(
         self,
@@ -180,9 +180,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
         query_params: QueryParamTypes | None = None,
         headers: HeaderTypes | None = None,
     ):
-        return await self._request(
-            "GET", endpoint, query_params, headers=headers
-        )
+        return await self._request("GET", endpoint, query_params, headers=headers)
 
 
 class PinMixin:

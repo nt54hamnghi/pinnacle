@@ -3,14 +3,12 @@ from unittest import mock
 import pytest
 from httpx import Request
 
-from pinnacle.ipfs.config import (
-    AuthKeyNotFoundError,
-    BearerAuth,
-    Config,
-    ENVNotFoundError,
-    _from_dot_env,
-    _from_os_env,
-)
+from pinnacle.ipfs.config import _from_dot_env
+from pinnacle.ipfs.config import _from_os_env
+from pinnacle.ipfs.config import AuthKeyNotFoundError
+from pinnacle.ipfs.config import BearerAuth
+from pinnacle.ipfs.config import Config
+from pinnacle.ipfs.config import ENVNotFoundError
 
 TEST_JWT = "d8a29446d9418907d51b9f146bdd0e8456e7d0cbe09cba0238df003a69f13289"
 TEST_SERVICE = "http://localhost"
@@ -117,9 +115,7 @@ def test_update_authentication_fail(authless_config: Config):
     with pytest.raises(ValueError) as error:
         authless_config.update_authentication(auth)
 
-    assert error.match(
-        "Cannot update authentication with an auth-less configuration"
-    )
+    assert error.match("Cannot update authentication with an auth-less configuration")
 
 
 def test_setup_without_auth(config: Config):

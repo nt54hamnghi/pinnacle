@@ -1,7 +1,9 @@
 import mimetypes
 import posixpath
 from io import UnsupportedOperation
-from typing import IO, Literal, cast
+from typing import cast
+from typing import IO
+from typing import Literal
 
 import anyio
 from anyio import AsyncFile
@@ -68,9 +70,7 @@ GATEWAYS = {
 GATEWAYS_STORE = GATEWAYS | SUBDOMAIN_SUPPORTED_GATEWAYS
 
 
-GatewayName = Literal[
-    "local", "local_ip", "ipfs", "nftstorage", "pinata", "w3s"
-]
+GatewayName = Literal["local", "local_ip", "ipfs", "nftstorage", "pinata", "w3s"]
 
 
 class BaseContent:
@@ -170,9 +170,7 @@ class BaseContent:
         try:
             gateway = GATEWAYS_STORE[name]
         except KeyError:
-            raise ValueError(
-                f"Invalid gateway. Available: {GATEWAYS_STORE.keys}"
-            )
+            raise ValueError(f"Invalid gateway. Available: {GATEWAYS_STORE.keys}")
         else:
             return gateway.gateway(self.cid, type)
 

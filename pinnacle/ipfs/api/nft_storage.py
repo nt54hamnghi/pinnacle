@@ -1,13 +1,16 @@
 from datetime import datetime
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 from ...constants.pin_services import NFT_STORAGE_SERVICE
 from ..config import Config
 from ..content import Content
 from ..model.model import Pin
-from .pin_api import AsyncPinAPI, PinAPI, PinMixin
+from .pin_api import AsyncPinAPI
+from .pin_api import PinAPI
+from .pin_api import PinMixin
 
 
 class NFT(BaseModel):
@@ -40,9 +43,7 @@ class NFTStorageAdd(BaseModel):
 class NFTStorageMixin(PinMixin):
     global_config = Config(url=NFT_STORAGE_SERVICE)
 
-    def _add(
-        self, content: Content, raw_response: httpx.Response, *args, **kwds
-    ):
+    def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
         return super()._add(content, raw_response, NFTStorageAdd)
 
 

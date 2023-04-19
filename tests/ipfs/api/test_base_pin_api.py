@@ -1,5 +1,7 @@
 from unittest import mock
+
 import pytest
+
 from pinnacle.ipfs import Config
 from pinnacle.ipfs.api.pin_api import BasePinAPI
 

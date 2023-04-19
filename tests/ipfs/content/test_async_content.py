@@ -1,6 +1,7 @@
 from io import UnsupportedOperation
 from pathlib import Path
-from typing import Literal, TypeAlias
+from typing import Literal
+from typing import TypeAlias
 
 import pytest
 
