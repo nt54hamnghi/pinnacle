@@ -19,10 +19,10 @@ def content():
 
 
 @pytest.fixture
-def files():
-    return {"file": ("filename", "test".encode(), "*/*")}
-
-
-@pytest.fixture
 def data():
     return {"option": json.dumps({"cidVersion": 1})}
+
+
+# @pytest.fixture
+# def files():
+#     return {"file": ("filename", "test".encode(), "*/*")}

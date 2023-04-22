@@ -5,6 +5,7 @@ from typing import Literal
 from typing import TypeVar
 
 import httpx
+import pydantic
 from httpx._types import HeaderTypes
 from httpx._types import QueryParamTypes
 from httpx._types import RequestContent
@@ -196,8 +197,12 @@ class PinMixin:
     ) -> ModelT:
         """Static method to transfrom raw response to pydantic model"""
         raw_response.raise_for_status()
+        raw_json = raw_response.json()
 
-        return response_model(**raw_response.json())
+        try:
+            return response_model.parse_obj(raw_json)
+        except pydantic.ValidationError:
+            return response_model.parse_raw(raw_json)
 
     def _add(
         self,
