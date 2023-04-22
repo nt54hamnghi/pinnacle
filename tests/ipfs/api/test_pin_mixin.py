@@ -7,11 +7,8 @@ import pytest
 import respx
 from pydantic import BaseModel
 from pydantic import Field
-from pydantic import parse_obj_as
 
-from pinnacle.ipfs.api import PinAPI
 from pinnacle.ipfs.api import PinMixin
-from pinnacle.ipfs.config import Config
 from pinnacle.ipfs.content import Content
 
 TEST_URL = "http://localhost/add"

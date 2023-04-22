@@ -17,11 +17,6 @@ def make_url(pin: AsyncPinAPI, endpoint: str):
     return f"{pin.config.url}/{endpoint}"
 
 
-@pytest.fixture
-def anyio_backend():
-    return "asyncio"
-
-
 class TestAsyncPinAPI(AsyncPinAPI):
     __test__ = False
     global_config = Config(url=TEST_URL)

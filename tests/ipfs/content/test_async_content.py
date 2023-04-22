@@ -19,11 +19,6 @@ ImgPathFixture: TypeAlias = tuple[Path, Literal["han.png"]]
 
 
 @pytest.fixture
-def anyio_backend():
-    return "asyncio"
-
-
-@pytest.fixture
 def async_content(img_path):
     path, _ = img_path
     return AsyncContent(path)

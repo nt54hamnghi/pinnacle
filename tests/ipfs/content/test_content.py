@@ -1,27 +1,9 @@
 from io import UnsupportedOperation
 from pathlib import Path
-from typing import Literal
-from typing import TypeAlias
 
 import pytest
 
-from pinnacle.constants import IMG_DIR
 from pinnacle.ipfs.content.content import Content
-
-
-@pytest.fixture
-def img_path():
-    filename = "han.png"
-    return IMG_DIR / filename, filename
-
-
-ImgPathFixture: TypeAlias = tuple[Path, Literal["han.png"]]
-
-
-@pytest.fixture
-def content(img_path: ImgPathFixture):
-    path, _ = img_path
-    return Content(path)
 
 
 def test_content(content: Content):
@@ -36,9 +18,7 @@ def test_content(content: Content):
         content.close()
 
 
-def test_content_context_manager(img_path: ImgPathFixture):
-    path, _ = img_path
-
+def test_content_context_manager(path: Path):
     with Content(path) as content:
         assert content.opened
         assert content._bytes is not None
@@ -46,9 +26,7 @@ def test_content_context_manager(img_path: ImgPathFixture):
     assert content.closed
 
 
-def test_reopen_fail(img_path: ImgPathFixture):
-    path, _ = img_path
-
+def test_reopen_fail(path: Path):
     with Content(path) as content:
         with pytest.raises(UnsupportedOperation):
             content.open()
