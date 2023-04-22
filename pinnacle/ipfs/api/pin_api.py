@@ -64,7 +64,7 @@ class PinAPI(BasePinAPI, ABC):
 
     @abstractmethod
     def add(self, content: Content, *, cid_version: int = 1):
-        ...
+        ...  # pragma: no cover
 
     def __enter__(self):
         self.api_client.__enter__()
@@ -130,7 +130,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
 
     @abstractmethod
     async def add(self, content: Content, *, cid_version: int = 1):
-        ...
+        ...  # pragma: no cover
 
     async def __aenter__(self):
         await self.api_client.__aenter__()

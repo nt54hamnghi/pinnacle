@@ -11,17 +11,17 @@ BEARER = f"Bearer {TEST_JWT}"
 EXTRA_PARAMS = {"headers": {"Content-Type": "*/*"}}
 
 
-class TestPinAPI(BasePinAPI):
+class TestBasePinAPI(BasePinAPI):
     __test__ = False
     global_config = Config(url=TEST_SERVICE, extra_params=EXTRA_PARAMS)
 
 
 @pytest.fixture
 def default_pin():
-    return TestPinAPI()
+    return TestBasePinAPI()
 
 
-def test_init_BasePinAPI_with_defaults(default_pin: TestPinAPI):
+def test_init_BasePinAPI_with_defaults(default_pin: TestBasePinAPI):
     assert not default_pin.authless
     assert default_pin.config.url == TEST_SERVICE
     assert default_pin.config.extra_params == EXTRA_PARAMS
@@ -29,7 +29,7 @@ def test_init_BasePinAPI_with_defaults(default_pin: TestPinAPI):
 
 def test_init_BasePinAPI():
     config = Config(TEST_SERVICE)
-    pin = TestPinAPI(config)
+    pin = TestBasePinAPI(config)
 
     assert pin.config.url == TEST_SERVICE
     assert pin.config.extra_params == {}
@@ -37,7 +37,7 @@ def test_init_BasePinAPI():
 
 def test_build_request_params():
     config = Config(TEST_SERVICE)
-    pin = TestPinAPI(config)
+    pin = TestBasePinAPI(config)
 
     endpoint = "add"
     request = pin._build_request_params(endpoint)
@@ -51,7 +51,7 @@ def test_build_request_params():
 
 def test_build_request_params_with_args():
     config = Config(TEST_SERVICE)
-    pin = TestPinAPI(config)
+    pin = TestBasePinAPI(config)
 
     endpoint = "add"
     request = pin._build_request_params(
@@ -65,14 +65,14 @@ def test_build_request_params_with_args():
     }
 
 
-def test_authenticate_with_TOKEN(default_pin: TestPinAPI):
+def test_authenticate_with_TOKEN(default_pin: TestBasePinAPI):
     default_pin.authenticate_with_token(TEST_JWT)
 
     assert default_pin.config.auth.bearer_token == BEARER
 
 
 @mock.patch("pinnacle.ipfs.config.os.getenv", return_value=TEST_JWT)
-def test_authenticate_with_ENV(mock_env, default_pin: TestPinAPI):
+def test_authenticate_with_ENV(mock_env, default_pin: TestBasePinAPI):
     default_pin.authenticate_with_env("TEST_JWT")
 
     assert default_pin.config.auth.bearer_token == BEARER
