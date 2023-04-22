@@ -1,12 +1,13 @@
-# from pinnacle.ipfs.api.pin import _pin, pin
-# from pinnacle.ipfs.api.pin_client import (
-#     Local,
-#     NFTStorage,
-#     NoIPFSDaemon,
-#     PinClient,
-#     Pinata,
-#     Web3Storage,
-# )
+from pinnacle.ipfs.api import AsyncLocalPin
+from pinnacle.ipfs.api import AsyncNFTStorage
+from pinnacle.ipfs.api import AsyncPinAPI
+from pinnacle.ipfs.api import AsyncPinata
+from pinnacle.ipfs.api import AsyncWeb3Storage
+from pinnacle.ipfs.api import LocalPin
+from pinnacle.ipfs.api import NFTStorage
+from pinnacle.ipfs.api import PinAPI
+from pinnacle.ipfs.api import Pinata
+from pinnacle.ipfs.api import Web3Storage
 from pinnacle.ipfs.config import AuthKeyNotFoundError
 from pinnacle.ipfs.config import BearerAuth
 from pinnacle.ipfs.config import Config
@@ -19,13 +20,14 @@ __all__ = [
     "Config",
     "ENVNotFoundError",
     "Content",
-    # "pin",
-    # "_pin",
-    # "NoIPFSDaemon",
-    # "AbstractPin",
-    # "PinClient",
-    # "Local",
-    # "Pinata",
-    # "NFTStorage",
-    # "Web3Storage",
+    "AsyncLocalPin",
+    "AsyncNFTStorage",
+    "AsyncPinAPI",
+    "AsyncPinata",
+    "AsyncWeb3Storage",
+    "LocalPin",
+    "NFTStorage",
+    "PinAPI",
+    "Pinata",
+    "Web3Storage",
 ]
