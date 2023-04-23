@@ -20,11 +20,20 @@ from ..content import Content
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
+class MissingConfigurationError(AttributeError):
+    def __init__(self, *args: object) -> None:
+        msg = "Argument config cannot be None if class does not declare a global config"
+        super().__init__(msg, *args)
+
+
 class BasePinAPI:
     global_config: ClassVar[Config]
 
     def __init__(self, config: Config | None = None, *args, **kwds) -> None:
-        self.config = self.global_config if config is None else config
+        try:
+            self.config = self.global_config if config is None else config
+        except AttributeError:
+            raise MissingConfigurationError
 
     def _build_request_params(
         self,

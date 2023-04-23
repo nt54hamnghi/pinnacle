@@ -4,6 +4,7 @@ import pytest
 
 from pinnacle.ipfs import Config
 from pinnacle.ipfs.api.pin_api import BasePinAPI
+from pinnacle.ipfs.api.pin_api import MissingConfigurationError
 
 TEST_JWT = "d8a29446d9418907d51b9f146bdd0e8456e7d0cbe09cba0238df003a69f13289"
 TEST_SERVICE = "http://localhost"
@@ -33,6 +34,14 @@ def test_init_BasePinAPI():
 
     assert pin.config.url == TEST_SERVICE
     assert pin.config.extra_params == {}
+
+
+def test_missing_config():
+    class InvalidBasePin(BasePinAPI):
+        ...
+
+    with pytest.raises(MissingConfigurationError):
+        InvalidBasePin()
 
 
 def test_build_request_params():
