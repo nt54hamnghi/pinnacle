@@ -15,7 +15,7 @@ class Web3StorageAdd(BaseModel):
 
 
 class Web3StorageMixin(PinMixin):
-    global_config = Config(url=WEB3_STORAGE_SERVICE)
+    global_config = Config(base_url=WEB3_STORAGE_SERVICE)
 
     def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
         return super()._add(content, raw_response, Web3StorageAdd)

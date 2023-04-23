@@ -41,7 +41,7 @@ class NFTStorageAdd(BaseModel):
 
 
 class NFTStorageMixin(PinMixin):
-    global_config = Config(url=NFT_STORAGE_SERVICE)
+    global_config = Config(base_url=NFT_STORAGE_SERVICE)
 
     def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
         return super()._add(content, raw_response, NFTStorageAdd)

@@ -2,8 +2,11 @@ import os
 from collections.abc import Generator
 from typing import Any
 from typing import Self
+from urllib.parse import urlsplit
+from urllib.parse import urlunsplit
 
 import httpx
+import validators
 from dotenv import dotenv_values
 from httpx import Request
 from httpx import Response
@@ -58,17 +61,30 @@ class BearerAuth(httpx.Auth):
                 raise AuthKeyNotFoundError
 
 
+class MalformedURLError(ValueError):
+    ...
+
+
+def sanitize_url(url: str) -> str:
+    if validators.url(url) is not True:
+        raise MalformedURLError()
+
+    parts = urlsplit(url, allow_fragments=False)._replace(query="")
+    return urlunsplit(parts)
+
+
 class Config:
     def __init__(
         self,
-        url: str = LOCAL_SERVICE,
+        base_url: str = LOCAL_SERVICE,
         auth: httpx.Auth | None = None,
         extra_params: dict[str, Any] | None = None,
         authless: bool = False,
     ) -> None:
-        self.url = url
+        self.url = sanitize_url(base_url)
         self.auth = auth
         self.authless = authless
+
         # extra_params is optional arguments of httpx methods.
         # https://www.python-httpx.org/api/#helper-functions
         self.extra_params = {} if extra_params is None else extra_params

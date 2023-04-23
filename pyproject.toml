@@ -10,6 +10,7 @@ httpx = "^0.23.3"
 psutil = "^5.9.4"
 python-dotenv = "^1.0.0"
 pydantic = "^1.10.7"
+validators = "^0.20.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
@@ -47,6 +48,10 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 # strictness
 strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["validators.*",]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

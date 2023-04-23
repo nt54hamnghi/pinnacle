@@ -9,6 +9,8 @@ from pinnacle.ipfs.config import AuthKeyNotFoundError
 from pinnacle.ipfs.config import BearerAuth
 from pinnacle.ipfs.config import Config
 from pinnacle.ipfs.config import ENVNotFoundError
+from pinnacle.ipfs.config import MalformedURLError
+from pinnacle.ipfs.config import sanitize_url
 
 TEST_JWT = "d8a29446d9418907d51b9f146bdd0e8456e7d0cbe09cba0238df003a69f13289"
 TEST_SERVICE = "http://localhost"
@@ -77,6 +79,46 @@ def test_auth_flow_no_token():
 
     with pytest.raises(KeyError):
         assert request.headers["Authorization"] == BEARER
+
+
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    (
+        (
+            "http://127.0.0.1:5001/api/v0?query=what#fragment",
+            "http://127.0.0.1:5001/api/v0",
+        ),
+        (
+            "https://api.pinata.cloud?query=what#fragment",
+            "https://api.pinata.cloud",
+        ),
+        (
+            "https://api.nft.storage?query=what#fragment",
+            "https://api.nft.storage",
+        ),
+        (
+            "https://api.web3.storage?query=what#fragment",
+            "https://api.web3.storage",
+        ),
+    ),
+    ids=["local-ip", "pinata", "nftstorage", "web3storage"],
+)
+def test_sanitize_url(url, expected):
+    assert sanitize_url(url) == expected
+
+
+@pytest.mark.parametrize(
+    "url",
+    (
+        "http:/127.0.0.1:5001/api/v0",
+        "https://api,pinata,cloud",
+        "https;//api.nft.storage",
+        "htts://api.web3.storage",
+    ),
+)
+def test_sanitize_url_fail(url):
+    with pytest.raises(MalformedURLError):
+        sanitize_url(url)
 
 
 @pytest.fixture

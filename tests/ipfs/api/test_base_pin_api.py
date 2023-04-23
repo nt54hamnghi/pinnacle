@@ -14,7 +14,7 @@ EXTRA_PARAMS = {"headers": {"Content-Type": "*/*"}}
 
 class TestBasePinAPI(BasePinAPI):
     __test__ = False
-    global_config = Config(url=TEST_SERVICE, extra_params=EXTRA_PARAMS)
+    global_config = Config(base_url=TEST_SERVICE, extra_params=EXTRA_PARAMS)
 
 
 @pytest.fixture

@@ -19,7 +19,7 @@ def make_url(pin: PinAPI, endpoint: str):
 
 class TestPinAPI(PinAPI):
     __test__ = False
-    global_config = Config(url=TEST_URL)
+    global_config = Config(base_url=TEST_URL)
 
     def add(self, content: Content, *, cid_version: int = 1):
         ...  # pragma: no cover

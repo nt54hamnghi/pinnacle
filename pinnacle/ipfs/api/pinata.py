@@ -27,7 +27,7 @@ class PinataAdd(BaseModel):
 
 
 class PinantaMixin(PinMixin):
-    global_config = Config(url=PINATA_SERVICE)
+    global_config = Config(base_url=PINATA_SERVICE)
 
     def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
         return super()._add(content, raw_response, PinataAdd)
