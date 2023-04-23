@@ -11,6 +11,7 @@ TEST_JWT = "d8a29446d9418907d51b9f146bdd0e8456e7d0cbe09cba0238df003a69f13289"
 TEST_SERVICE = "http://localhost"
 BEARER = f"Bearer {TEST_JWT}"
 EXTRA_PARAMS = {"headers": {"Content-Type": "*/*"}}
+ENDPOINT = "add"
 
 
 class TestBasePinAPI(BasePinAPI):
@@ -63,11 +64,10 @@ def test_build_request_params():
     config = Config(TEST_SERVICE)
     pin = TestBasePinAPI(config)
 
-    endpoint = "add"
-    request = pin._build_request_params(endpoint)
+    request = pin._build_request_params(ENDPOINT)
 
     assert request == {
-        "url": f"{TEST_SERVICE}/{endpoint}",
+        "url": f"{TEST_SERVICE}/{ENDPOINT}",
         "params": None,
         "headers": None,
     }
@@ -77,16 +77,25 @@ def test_build_request_params_with_args():
     config = Config(TEST_SERVICE)
     pin = TestBasePinAPI(config)
 
-    endpoint = "add"
     request = pin._build_request_params(
-        endpoint, query_params={"test": None}, headers={"content_type": None}
+        ENDPOINT, query_params={"test": None}, headers={"content_type": None}
     )
 
     assert request == {
-        "url": f"{TEST_SERVICE}/{endpoint}",
+        "url": f"{TEST_SERVICE}/{ENDPOINT}",
         "params": {"test": None},
         "headers": {"content_type": None},
     }
+
+
+def test_build_request_params_fail():
+    config = Config(TEST_SERVICE)
+    pin = TestBasePinAPI(config)
+
+    with pytest.raises(ValueError) as error:
+        pin._build_request_params("")
+
+    assert error.match("Endpoint cannot be empty")
 
 
 def test_authenticate_with_TOKEN(default_pin: TestBasePinAPI):

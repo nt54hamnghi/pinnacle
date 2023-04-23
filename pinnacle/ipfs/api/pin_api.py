@@ -3,6 +3,7 @@ from abc import abstractmethod
 from typing import ClassVar
 from typing import Literal
 from typing import TypeVar
+from urllib.parse import quote as urlquote
 
 import httpx
 import pydantic
@@ -28,7 +29,7 @@ class MissingConfigurationError(AttributeError):
 
 def urljoin(base: str, endpoint: str):
     base = base.rstrip("/")
-    endpoint = endpoint.lstrip("/")
+    endpoint = urlquote(endpoint.lstrip("/"), safe=":/?=&")
 
     return "/".join([base, endpoint])
 
@@ -48,6 +49,9 @@ class BasePinAPI:
         query_params: QueryParamTypes | None = None,
         headers: HeaderTypes | None = None,
     ):
+        if len(endpoint) == 0:
+            raise ValueError("Endpoint cannot be empty")
+
         base = self.config.url
 
         request_params = dict(

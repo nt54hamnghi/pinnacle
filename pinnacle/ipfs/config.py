@@ -70,7 +70,6 @@ def sanitize_url(url: str) -> str:
     if validators.url(url) is not True:
         raise MalformedURLError()
 
-    url = quote(url, safe=":/?=&")
     parts = urlsplit(url, allow_fragments=False)._replace(query="")
     return urlunsplit(parts)
 
