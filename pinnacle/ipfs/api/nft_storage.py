@@ -7,7 +7,7 @@ from pydantic import Field
 from ...constants.pin_services import NFT_STORAGE_SERVICE
 from ..config import Config
 from ..content import Content
-from ..model.model import Pin
+from ..models.models import Pin
 from .pin_api import AsyncPinAPI
 from .pin_api import PinAPI
 from .pin_api import PinMixin

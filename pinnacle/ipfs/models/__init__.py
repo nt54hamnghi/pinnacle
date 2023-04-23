@@ -1,10 +1,10 @@
 from .error import Error
 from .error import Failure
-from .model import Pin
-from .model import PinResults
-from .model import PinStatus
-from .model import Status
-from .model import TextMatchingStrategy
+from .models import Pin
+from .models import PinResults
+from .models import PinStatus
+from .models import Status
+from .models import TextMatchingStrategy
 
 __all__ = (
     "Pin",
