@@ -6,13 +6,15 @@ import respx
 
 from pinnacle.ipfs.api.local_pin import AsyncLocalPin
 from pinnacle.ipfs.api.local_pin import NoIPFSDaemonError
+from pinnacle.ipfs.api.pin_api import urljoin
 from pinnacle.ipfs.content import AsyncContent
 
 TEST_URL = "http://localhost"
 
 
 def make_url(pin: AsyncLocalPin, endpoint: str):
-    return f"{pin.config.url}/{endpoint}"
+    base = pin.config.url
+    return urljoin(base, endpoint)
 
 
 @pytest.mark.anyio

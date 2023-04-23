@@ -26,6 +26,13 @@ class MissingConfigurationError(AttributeError):
         super().__init__(msg, *args)
 
 
+def urljoin(base: str, endpoint: str):
+    base = base.rstrip("/")
+    endpoint = endpoint.lstrip("/")
+
+    return "/".join([base, endpoint])
+
+
 class BasePinAPI:
     global_config: ClassVar[Config]
 
@@ -41,11 +48,14 @@ class BasePinAPI:
         query_params: QueryParamTypes | None = None,
         headers: HeaderTypes | None = None,
     ):
+        base = self.config.url
+
         request_params = dict(
-            url=f"{self.config.url}/{endpoint}",
+            url=urljoin(base, endpoint),
             params=query_params,
             headers=headers,
         )
+
         return request_params | self.config.setup()
 
     def authenticate_with_token(self, token: str):

@@ -5,6 +5,7 @@ import pytest
 from pinnacle.ipfs import Config
 from pinnacle.ipfs.api.pin_api import BasePinAPI
 from pinnacle.ipfs.api.pin_api import MissingConfigurationError
+from pinnacle.ipfs.api.pin_api import urljoin
 
 TEST_JWT = "d8a29446d9418907d51b9f146bdd0e8456e7d0cbe09cba0238df003a69f13289"
 TEST_SERVICE = "http://localhost"
@@ -15,6 +16,20 @@ EXTRA_PARAMS = {"headers": {"Content-Type": "*/*"}}
 class TestBasePinAPI(BasePinAPI):
     __test__ = False
     global_config = Config(base_url=TEST_SERVICE, extra_params=EXTRA_PARAMS)
+
+
+@pytest.mark.parametrize(
+    ("base, endpoint, expected"),
+    (
+        ("https://example.com", "endpoint", "https://example.com/endpoint"),
+        ("https://example.com/", "endpoint", "https://example.com/endpoint"),
+        ("https://example.com", "/endpoint", "https://example.com/endpoint"),
+        ("https://example.com/", "/endpoint", "https://example.com/endpoint"),
+    ),
+    ids=["without", "trailing", "leading", "both"],
+)
+def test_urljoin(base, endpoint, expected):
+    assert urljoin(base, endpoint) == expected
 
 
 @pytest.fixture
