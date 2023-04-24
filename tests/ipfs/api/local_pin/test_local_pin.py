@@ -10,9 +10,9 @@ from pinnacle.ipfs.api.local_pin import LocalPinMixin
 from pinnacle.ipfs.api.local_pin import NoIPFSDaemonError
 from pinnacle.ipfs.api.pin_api import urljoin
 from pinnacle.ipfs.content import Content
-from tests.ipfs.api.test_pin_api import ENDPOINT
 
 TEST_URL = "http://localhost"
+ENDPOINT = "add"
 
 
 def make_url(pin: LocalPin, endpoint: str):

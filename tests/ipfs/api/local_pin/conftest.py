@@ -1,5 +1,3 @@
-from calendar import c
-
 import httpx
 import pytest
 
