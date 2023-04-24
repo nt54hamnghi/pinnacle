@@ -28,6 +28,7 @@ def data():
 
 TEST_URL = "http://localhost"
 ENDPOINT = "add"
+CID = "bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4"
 
 
 def make_url(pin: BasePinAPI, endpoint: str):

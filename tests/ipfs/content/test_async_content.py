@@ -1,26 +1,13 @@
 from io import UnsupportedOperation
 from pathlib import Path
-from typing import Literal
-from typing import TypeAlias
 
 import pytest
 
-from pinnacle.constants import IMG_DIR
 from pinnacle.ipfs.content.content import AsyncContent
 
 
 @pytest.fixture
-def img_path():
-    filename = "han.png"
-    return IMG_DIR / filename, filename
-
-
-ImgPathFixture: TypeAlias = tuple[Path, Literal["han.png"]]
-
-
-@pytest.fixture
-def async_content(img_path):
-    path, _ = img_path
+def async_content(path):
     return AsyncContent(path)
 
 
@@ -38,9 +25,7 @@ async def test_async_content(async_content: AsyncContent):
 
 
 @pytest.mark.anyio
-async def test_async_content_context_manager(img_path: ImgPathFixture):
-    path, _ = img_path
-
+async def test_async_content_context_manager(path: Path):
     async with AsyncContent(path) as content:
         assert content.opened
         assert content._bytes is not None
@@ -49,9 +34,7 @@ async def test_async_content_context_manager(img_path: ImgPathFixture):
 
 
 @pytest.mark.anyio
-async def test_async_reopen_fail(img_path: ImgPathFixture):
-    path, _ = img_path
-
+async def test_async_reopen_fail(path: Path):
     async with AsyncContent(path) as content:
         with pytest.raises(UnsupportedOperation):
             await content.open()

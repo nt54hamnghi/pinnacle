@@ -6,6 +6,11 @@ import pytest
 from pinnacle.ipfs.content.content import Content
 
 
+@pytest.fixture
+def content(path: Path):
+    return Content(path)
+
+
 def test_content(content: Content):
     try:
         content.open()

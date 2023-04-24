@@ -1,9 +1,6 @@
-from pathlib import Path
-
 import pytest
 
 from pinnacle.constants.dirs import IMG_DIR
-from pinnacle.ipfs.content.content import Content
 
 
 @pytest.fixture
@@ -19,8 +16,3 @@ def filename():
 @pytest.fixture
 def path(filename: str):
     return IMG_DIR / filename
-
-
-@pytest.fixture
-def content(path: Path):
-    return Content(path)

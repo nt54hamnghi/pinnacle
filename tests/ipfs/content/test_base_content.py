@@ -1,12 +1,9 @@
 from itertools import product
 from pathlib import Path
-from typing import Literal
-from typing import TypeAlias
 from unittest import mock
 
 import pytest
 
-from pinnacle.constants import IMG_DIR
 from pinnacle.ipfs.content import Gateway
 from pinnacle.ipfs.content.content import BaseContent
 from pinnacle.ipfs.content.content import GATEWAYS
@@ -25,22 +22,11 @@ URI = f"ipfs://{CID}"
 
 
 @pytest.fixture
-def img_path():
-    filename = "han.png"
-    return IMG_DIR / filename, filename
-
-
-ImgPathFixture: TypeAlias = tuple[Path, Literal["han.png"]]
-
-
-@pytest.fixture
-def base_content(img_path):
-    path, _ = img_path
+def base_content(path: Path):
     return BaseContent(path)
 
 
-def test_content_basename(base_content: BaseContent, img_path: ImgPathFixture):
-    filename = img_path[1]
+def test_content_basename(base_content: BaseContent, filename: str):
     assert base_content.basename == filename
 
 
