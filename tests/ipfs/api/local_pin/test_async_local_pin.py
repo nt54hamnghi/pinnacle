@@ -7,6 +7,7 @@ import respx
 from pinnacle.ipfs.api.local_pin import AsyncLocalPin
 from pinnacle.ipfs.api.local_pin import NoIPFSDaemonError
 from pinnacle.ipfs.content import AsyncContent
+from pinnacle.ipfs.models.models import Pin
 from tests.ipfs.api.conftest import CID
 from tests.ipfs.api.conftest import make_url
 
@@ -30,8 +31,9 @@ async def test_LocalPin_add(
 
         res = await pin.add(content, cid_version=1)
 
-    assert res.Hash == CID
-    assert res.Name == filename
+    assert isinstance(res, Pin)
+    assert res.cid == CID
+    assert res.name == filename
 
 
 @pytest.mark.anyio

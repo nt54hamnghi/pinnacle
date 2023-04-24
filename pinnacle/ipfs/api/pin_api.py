@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from ..config import BearerAuth
 from ..config import Config
 from ..content import Content
+from pinnacle.ipfs.models.models import Pin
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -87,7 +88,7 @@ class PinAPI(BasePinAPI, ABC):
         self.api_client = api_client or httpx.Client()
 
     @abstractmethod
-    def add(self, content: Content, *, cid_version: int = 1):
+    def add(self, content: Content, *, cid_version: int = 1) -> Pin:
         ...  # pragma: no cover
 
     def __enter__(self):
@@ -153,7 +154,7 @@ class AsyncPinAPI(BasePinAPI, ABC):
         self.api_client = api_client or httpx.AsyncClient()
 
     @abstractmethod
-    async def add(self, content: Content, *, cid_version: int = 1):
+    async def add(self, content: Content, *, cid_version: int = 1) -> Pin:
         ...  # pragma: no cover
 
     async def __aenter__(self):

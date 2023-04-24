@@ -9,6 +9,7 @@ from pinnacle.ipfs.api.local_pin import LocalPin
 from pinnacle.ipfs.api.local_pin import LocalPinMixin
 from pinnacle.ipfs.api.local_pin import NoIPFSDaemonError
 from pinnacle.ipfs.content import Content
+from pinnacle.ipfs.models.models import Pin
 from tests.ipfs.api.conftest import CID
 from tests.ipfs.api.conftest import make_url
 
@@ -49,8 +50,9 @@ def test_LocalPin_add(
 
         res = pin.add(content, cid_version=1)
 
-    assert res.Hash == CID
-    assert res.Name == filename
+    assert isinstance(res, Pin)
+    assert res.cid == CID
+    assert res.name == filename
 
 
 def test_LocalPin_add_fail(path: Path):

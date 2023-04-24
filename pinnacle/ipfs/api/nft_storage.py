@@ -7,7 +7,8 @@ from pydantic import Field
 from ...constants.pin_services import NFT_STORAGE_SERVICE
 from ..config import Config
 from ..content import Content
-from ..models.models import Pin
+from ..models import Pin
+from ..models import PinMeta
 from .pin_api import AsyncPinAPI
 from .pin_api import PinAPI
 from .pin_api import PinMixin
@@ -44,7 +45,15 @@ class NFTStorageMixin(PinMixin):
     global_config = Config(base_url=NFT_STORAGE_SERVICE)
 
     def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
-        return super()._add(content, raw_response, NFTStorageAdd)
+        response = super()._add(content, raw_response, NFTStorageAdd)
+
+        nft = response.value
+
+        return nft.pin or Pin(
+            cid=response.cid,
+            name=content.basename,
+            meta=PinMeta.from_model(nft, exclude={"cid"}),
+        )
 
 
 class NFTStorage(NFTStorageMixin, PinAPI):

@@ -1,6 +1,7 @@
 from .error import Error
 from .error import Failure
 from .models import Pin
+from .models import PinMeta
 from .models import PinResults
 from .models import PinStatus
 from .models import Status
@@ -14,4 +15,5 @@ __all__ = (
     "Failure",
     "TextMatchingStrategy",
     "Status",
+    "PinMeta",
 )

@@ -5,6 +5,8 @@ from pydantic import Field
 
 from ..config import Config
 from ..content import Content
+from ..models import Pin
+from ..models import PinMeta
 from .pin_api import AsyncPinAPI
 from .pin_api import PinAPI
 from .pin_api import PinMixin
@@ -34,7 +36,13 @@ class LocalPinMixin(PinMixin):
         return "ipfs" in {p.name() for p in psutil.process_iter()}
 
     def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
-        return super()._add(content, raw_response, LocalPinAdd)
+        response = super()._add(content, raw_response, LocalPinAdd)
+
+        return Pin(
+            cid=response.cid,
+            name=response.Name,
+            meta=PinMeta.from_model(response, exclude={"Name", "Hash"}),
+        )
 
 
 class LocalPin(LocalPinMixin, PinAPI):

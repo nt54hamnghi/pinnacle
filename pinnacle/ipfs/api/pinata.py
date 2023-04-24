@@ -8,6 +8,8 @@ from pydantic import Field
 from ...constants import PINATA_SERVICE
 from ..config import Config
 from ..content import Content
+from ..models import Pin
+from ..models import PinMeta
 from .pin_api import AsyncPinAPI
 from .pin_api import PinAPI
 from .pin_api import PinMixin
@@ -30,7 +32,13 @@ class PinantaMixin(PinMixin):
     global_config = Config(base_url=PINATA_SERVICE)
 
     def _add(self, content: Content, raw_response: httpx.Response, *args, **kwds):
-        return super()._add(content, raw_response, PinataAdd)
+        response = super()._add(content, raw_response, PinataAdd)
+
+        return Pin(
+            cid=response.cid,
+            name=content.basename,
+            meta=PinMeta.from_model(response, {"IpfsHash"}),
+        )
 
 
 class Pinata(PinantaMixin, PinAPI):
