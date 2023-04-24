@@ -9,7 +9,7 @@ from tests.ipfs.api.conftest import make_url
 
 
 @respx.mock
-def test_LocalPin_add(mocked_pinata_add, path: Path):
+def test_Pinata_add(mocked_pinata_add, path: Path):
     with Pinata() as pin, Content(path) as content:
         url = make_url(pin, "pinning/pinFileToIPFS")
         respx.post(url).mock(return_value=mocked_pinata_add)
