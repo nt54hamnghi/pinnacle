@@ -2,6 +2,9 @@ import json
 
 import pytest
 
+from pinnacle.ipfs.api.pin_api import BasePinAPI
+from pinnacle.ipfs.api.pin_api import urljoin
+
 
 @pytest.fixture
 def headers():
@@ -23,6 +26,10 @@ def data():
     return {"option": json.dumps({"cidVersion": 1})}
 
 
-# @pytest.fixture
-# def files():
-#     return {"file": ("filename", "test".encode(), "*/*")}
+TEST_URL = "http://localhost"
+ENDPOINT = "add"
+
+
+def make_url(pin: BasePinAPI, endpoint: str):
+    base = pin.config.url
+    return urljoin(base, endpoint)

@@ -6,15 +6,9 @@ import respx
 
 from pinnacle.ipfs.api.local_pin import AsyncLocalPin
 from pinnacle.ipfs.api.local_pin import NoIPFSDaemonError
-from pinnacle.ipfs.api.pin_api import urljoin
 from pinnacle.ipfs.content import AsyncContent
-
-TEST_URL = "http://localhost"
-
-
-def make_url(pin: AsyncLocalPin, endpoint: str):
-    base = pin.config.url
-    return urljoin(base, endpoint)
+from tests.ipfs.api.conftest import ENDPOINT
+from tests.ipfs.api.conftest import make_url
 
 
 @pytest.mark.anyio
@@ -30,7 +24,7 @@ async def test_LocalPin_add(
     patched.return_value = True
 
     async with AsyncLocalPin() as pin, AsyncContent(path) as content:
-        url = make_url(pin, "add")
+        url = make_url(pin, ENDPOINT)
         respx.post(url, params={"cid-version": 1}).mock(return_value=mocked_add)
 
         res = await pin.add(content, cid_version=1)

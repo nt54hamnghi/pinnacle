@@ -8,16 +8,9 @@ import respx
 from pinnacle.ipfs.api.local_pin import LocalPin
 from pinnacle.ipfs.api.local_pin import LocalPinMixin
 from pinnacle.ipfs.api.local_pin import NoIPFSDaemonError
-from pinnacle.ipfs.api.pin_api import urljoin
 from pinnacle.ipfs.content import Content
-
-TEST_URL = "http://localhost"
-ENDPOINT = "add"
-
-
-def make_url(pin: LocalPin, endpoint: str):
-    base = pin.config.url
-    return urljoin(base, endpoint)
+from tests.ipfs.api.conftest import ENDPOINT
+from tests.ipfs.api.conftest import make_url
 
 
 mock_ipfs = mock.MagicMock(spec=psutil.Process)

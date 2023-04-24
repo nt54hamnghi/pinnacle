@@ -7,14 +7,9 @@ import respx
 from pinnacle.ipfs import Config
 from pinnacle.ipfs import Content
 from pinnacle.ipfs.api import AsyncPinAPI
-
-
-TEST_URL = "http://localhost"
-ENDPOINT = "add"
-
-
-def make_url(pin: AsyncPinAPI, endpoint: str):
-    return f"{pin.config.url}/{endpoint}"
+from tests.ipfs.api.conftest import ENDPOINT
+from tests.ipfs.api.conftest import make_url
+from tests.ipfs.api.conftest import TEST_URL
 
 
 class TestAsyncPinAPI(AsyncPinAPI):
