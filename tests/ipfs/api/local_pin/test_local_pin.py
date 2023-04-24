@@ -10,7 +10,6 @@ from pinnacle.ipfs.api.local_pin import LocalPinMixin
 from pinnacle.ipfs.api.local_pin import NoIPFSDaemonError
 from pinnacle.ipfs.content import Content
 from tests.ipfs.api.conftest import CID
-from tests.ipfs.api.conftest import ENDPOINT
 from tests.ipfs.api.conftest import make_url
 
 
@@ -43,7 +42,7 @@ def test_LocalPin_add(
     patched.return_value = True
 
     with LocalPin() as pin, Content(path) as content:
-        url = make_url(pin, ENDPOINT)
+        url = make_url(pin, "add")
         respx.post(url, params={"cid-version": 1}).mock(
             return_value=mocked_local_pin_add
         )
